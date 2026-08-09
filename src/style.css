@@ -449,6 +449,64 @@ p {
   }
 }
 
+/* 401k menu spectrum (Chapter 6) — three rows, bars widen with risk/upside */
+.spectrum {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.spectrum__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  background: var(--night-800);
+  border: 1px solid var(--night-600);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--step--1);
+}
+
+.spectrum__name {
+  color: var(--star);
+  font-weight: 700;
+}
+
+.spectrum__tag {
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.spectrum__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--night-600);
+}
+
+.spectrum__bar--low {
+  width: 20%;
+}
+
+.spectrum__bar--mid {
+  width: 55%;
+  background: var(--lamp-gold-dim);
+}
+
+.spectrum__bar--high {
+  width: 100%;
+  background: var(--lamp-gold);
+}
+
+.spectrum__axis {
+  text-align: center;
+  margin-top: var(--space-1);
+}
+
 /* Roth vs Traditional paths (Chapter 5) */
 .paths {
   display: grid;
