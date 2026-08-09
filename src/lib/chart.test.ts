@@ -48,3 +48,48 @@ describe("lineChart", () => {
     expect(growingLine).toContain(",12.0"); // and the growing line still reaches the top
   });
 });
+
+describe("lineChart xLabels (WHI-104)", () => {
+  const series = [{ points: [[32, 0], [65, 10_000]] as Array<[number, number]>, className: "c" }];
+
+  it("renders a text marker per label, positioned on the data x-scale", () => {
+    const svg = lineChart({
+      series,
+      label: "with markers",
+      xLabels: [
+        { x: 32, text: "32" },
+        { x: 48.5, text: "48" },
+        { x: 65, text: "65" },
+      ],
+    });
+    const labels = svg.match(/<text[^>]*>[^<]*<\/text>/g)!;
+    expect(labels).toHaveLength(3);
+    expect(labels[0]).toContain('x="12.0"'); // left pad
+    expect(labels[2]).toContain('x="308.0"'); // width 320 - pad
+    expect(labels[1]).toContain(">48<");
+    for (const l of labels) expect(l).toContain('class="curve__axis-label"');
+  });
+
+  it("cedes a bottom strip to the label row so the curve never overlaps text", () => {
+    const withLabels = lineChart({ series, label: "l", xLabels: [{ x: 32, text: "32" }] });
+    // Curve floor moves up from 188 (200 - pad) to 172 (label strip of 16).
+    expect(withLabels).toContain(",172.0");
+    expect(withLabels).not.toContain(",188.0");
+  });
+
+  it("changes nothing when no labels are passed", () => {
+    const plain = lineChart({ series, label: "plain" });
+    expect(plain).not.toContain("<text");
+    expect(plain).toContain(",188.0"); // original floor
+    expect(plain).toContain(",12.0"); // original top
+  });
+
+  it("centers a flat series within the label-adjusted plot area (WHI-103 × WHI-104)", () => {
+    const svg = lineChart({
+      series: [{ points: [[32, 0], [65, 0]], className: "c" }],
+      label: "flat with markers",
+      xLabels: [{ x: 32, text: "32" }],
+    });
+    for (const y of yCoords(svg)) expect(y).toBe(92); // (pad 12 + floor 172) / 2
+  });
+});

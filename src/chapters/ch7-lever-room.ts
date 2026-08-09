@@ -262,9 +262,15 @@ export const chapter7 = {
       q("[data-lv='raise']").textContent = `${levers.raisePercent}%`;
       q("[data-balance]").textContent = formatMoney(result.balance);
       q("[data-retire-age]").textContent = String(levers.retireAge);
+      const midAge = Math.round((CURRENT_AGE + levers.retireAge) / 2);
       q("[data-chart]").innerHTML = lineChart({
         series: [{ points: result.points, className: "curve__line curve__line--now" }],
         label: `Projected balance from age ${CURRENT_AGE} to ${levers.retireAge}: ${formatMoney(result.balance)} in Real Dollars`,
+        xLabels: [
+          { x: CURRENT_AGE, text: String(CURRENT_AGE) },
+          { x: midAge, text: String(midAge) },
+          { x: levers.retireAge, text: String(levers.retireAge) },
+        ],
       });
       const score = examDone
         ? ` P.S. ${correctCount(examState, examSpec.questions)} out of ${examSpec.questions.length} on the exam — I kept the score. The enrolling is what I framed.`

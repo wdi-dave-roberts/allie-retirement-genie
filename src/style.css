@@ -288,6 +288,11 @@ p {
   }
 }
 
+.curve__axis-label {
+  fill: var(--text-dim);
+  font-size: 11px;
+}
+
 .curve__legend {
   display: flex;
   justify-content: space-between;
