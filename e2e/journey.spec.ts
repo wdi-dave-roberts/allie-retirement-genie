@@ -11,6 +11,8 @@ test("full journey: intake → seven chapters → celebration → resume", async
 
   // — Chapter 1: intro + intake —
   await expect(page.getByRole("heading", { name: "Meet the Genie" })).toBeVisible();
+  // First screen has nowhere to go back to, so no Back button (WHI-88).
+  await expect(page.getByRole("button", { name: "Back", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Let's do it" }).click();
 
   for (const answer of ["52000", "2600", "1800", "6"]) {
