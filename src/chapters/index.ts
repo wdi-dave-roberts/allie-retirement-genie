@@ -6,6 +6,7 @@
 
 import { genieSVG, type GeniePose } from "../genie/genie";
 import { chapter2 } from "./ch2-the-curve";
+import { chapter3 } from "./ch3-free-money";
 
 export interface Chapter {
   id: string;
@@ -37,16 +38,7 @@ export const chapters: Chapter[] = [
     ),
   },
   chapter2,
-  {
-    id: "free-money",
-    title: "Free Money",
-    render: placeholder(
-      "Chapter 3",
-      "Free Money",
-      "Your employer is holding out cash and you haven't put your hand out. Let's fix that.",
-      "point",
-    ),
-  },
+  chapter3,
   {
     id: "paycheck-bracket-myth",
     title: "Your Paycheck & the Bracket Myth",
