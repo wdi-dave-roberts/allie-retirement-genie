@@ -95,6 +95,7 @@ export const chapter4 = {
         effective <strong data-out="effective"></strong><br />
         Take-home <strong data-out="net"></strong> <span class="dim" data-out="delta"></span>
       </p>
+      <p class="dim">"Effective" is what you actually pay averaged across all your buckets — always lower than your top one.</p>
       ${bucketsHTML()}
       <div class="speech"><p>One more trick while we're here: your 6% goes in <em>before</em> federal tax. Contributing ${formatExact(contribution)} a year only shrinks your take-home by <strong>${formatExact(monthlyCost)} a month</strong> — while <strong>${formatExact(monthlyIntoAccount)} a month</strong> lands in your account, match included.</p></div>
       <p class="dim">2026 single-filer brackets, standard deduction, verified against IRS and SSA sources. Real Dollars everywhere else, real tax law here.</p>
