@@ -65,6 +65,9 @@ test("full journey: intake → seven chapters → celebration → resume", async
   // — Chapter 7: Lever Room & Action Checklist —
   await expect(page.getByRole("heading", { name: "Lever Room" })).toBeVisible();
   await expect(page.getByText("yours at 65, in today's dollars")).toBeVisible();
+  // Why this number beats Chapter 2's — head start + raises (WHI-93).
+  await expect(page.getByText("Bigger than Chapter 2's curve?")).toBeVisible();
+  await expect(page.getByText("$2K head start")).toBeVisible(); // formatMoney(1800)
   // The story ends inside the chapter — no forward button remains.
   await expect(page.locator('[data-nav="forward"]')).toHaveCount(0);
 
