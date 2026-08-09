@@ -40,7 +40,7 @@ export function formatExact(value: number): string {
   return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
-function confetti(host: HTMLElement): void {
+export function confetti(host: HTMLElement): void {
   const burst = document.createElement("div");
   burst.className = "confetti";
   const pieces = 36;
