@@ -163,6 +163,15 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
           fresh.disabled = !allAnswered(state);
         }, 350);
       }
+      // She tapped submit at the BOTTOM of the quiz; the win row renders at
+      // the TOP, a full quiz above the viewport (human UAT: passed and never
+      // saw the celebration or the Review answers button). Bring it to her.
+      if (passed(state, questions)) {
+        const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        host
+          .querySelector(".quiz__result-row")
+          ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+      }
       hooks.onChange?.(isDone(state, questions));
     });
 
