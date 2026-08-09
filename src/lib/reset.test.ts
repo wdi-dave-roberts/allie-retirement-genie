@@ -3,6 +3,7 @@ import { clearChecklist, loadChecklist } from "../chapters/ch7-lever-room";
 import { isEnrolled, isRothCheckFlagged, setEnrolled, setRothCheckFlagged } from "./enrollment";
 import { DEFAULT_PROFILE, loadProfile, saveProfile } from "./profile";
 import { loadCurrent, saveCurrent } from "./progress";
+import { loadQuizState, newQuizState, saveQuizState } from "./quiz";
 import { clearAllState } from "./reset";
 
 // Tests run in plain node; give the stores a real-enough localStorage.
@@ -27,6 +28,7 @@ function populateEverything(): void {
     "genie.checklist.v1",
     JSON.stringify({ login: true, enroll: true, match: true, roth: true, fund: true, doneBy: "2026-09-01" }),
   );
+  saveQuizState("ch2", { ...newQuizState(3), tries: 2 });
 }
 
 describe("clearAllState", () => {
@@ -48,6 +50,7 @@ describe("clearAllState", () => {
     expect(isEnrolled()).toBe(false);
     expect(isRothCheckFlagged()).toBe(false);
     expect(loadChecklist().doneBy).toBe("");
+    expect(loadQuizState("ch2", 3)).toEqual(newQuizState(3));
   });
 
   it("individual clears only remove their own keys", () => {

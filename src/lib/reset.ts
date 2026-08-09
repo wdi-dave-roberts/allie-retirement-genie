@@ -8,10 +8,12 @@ import { clearChecklist } from "../chapters/ch7-lever-room";
 import { clearEnrollment } from "./enrollment";
 import { clearProfile } from "./profile";
 import { clearProgress } from "./progress";
+import { clearQuizState } from "./quiz";
 
 export function clearAllState(): void {
   clearProfile();
   clearProgress();
   clearEnrollment();
   clearChecklist();
+  clearQuizState();
 }
