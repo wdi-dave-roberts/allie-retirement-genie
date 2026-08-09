@@ -7,8 +7,10 @@
 
 import { genieSVG } from "../genie/genie";
 import { formatMoney } from "../lib/format";
-import { loadProfile } from "../lib/profile";
+import { loadProfile, type Profile } from "../lib/profile";
 import { employerMatchMonthly } from "../lib/projection";
+import type { QuizSpec } from "../lib/quiz";
+import { uniqueDistractors } from "../quiz/choices";
 import { BRACKETS_SINGLE_2026, paycheck, taxableIncome } from "../lib/tax2026";
 
 const CONTRIBUTION_PERCENT = 6;
@@ -55,9 +57,56 @@ function bucketsHTML(): string {
   return `<div class="buckets">${rows}</div>`;
 }
 
+/** Chapter 4 Quiz (WHI-96) — the monthly-cost figure is hers, from the tax lib. */
+export function quizCh4(profile: Profile): QuizSpec {
+  const contribution = (profile.salary * CONTRIBUTION_PERCENT) / 100;
+  const monthlyCost = (paycheck(profile.salary).net - paycheck(profile.salary, contribution).net) / 12;
+  const cost = formatExact(monthlyCost);
+  const distractors = uniqueDistractors(cost, [
+    formatExact(contribution / 12), // the myth this beat kills: 6% must cost 6%
+    formatExact(monthlyCost * 2),
+    formatExact(monthlyCost * 3),
+  ]);
+  return {
+    id: "ch4",
+    questions: [
+      {
+        prompt: "A raise bumps you into a higher bracket. Your take-home pay…",
+        choices: [
+          "Drops — the whole paycheck gets the new rate",
+          "Rises — only dollars inside the top bucket pay the higher rate",
+          "Stays exactly the same",
+        ],
+        correctIndex: 1,
+        explain: "Brackets are buckets: the new rate never touches the dollars below the line.",
+        sectionRef: { chapter: 3, anchor: "sec-bracket-myth" },
+      },
+      {
+        prompt: "Compared to your marginal (top-bucket) rate, your effective rate is…",
+        choices: [
+          "Higher — fees pile on top",
+          "Identical — two names, one number",
+          "Lower — it's the average across all your buckets",
+        ],
+        correctIndex: 2,
+        explain: "Averaged across every bucket, it always lands below your top rate.",
+        sectionRef: { chapter: 3, anchor: "sec-effective" },
+      },
+      {
+        prompt: `Putting ${formatExact(contribution)} a year (6%) into your 401k shrinks your monthly take-home by about…`,
+        choices: [cost, ...distractors],
+        correctIndex: 0,
+        explain: "The contribution leaves before federal tax, so your paycheck drops by less than the full amount.",
+        sectionRef: { chapter: 3, anchor: "sec-pretax" },
+      },
+    ],
+  };
+}
+
 export const chapter4 = {
   id: "paycheck-bracket-myth",
   title: "Your Paycheck & the Bracket Myth",
+  quiz: (): QuizSpec => quizCh4(loadProfile()),
   render(root: HTMLElement): void {
     const profile = loadProfile();
     if (profile.salary <= 0) {
@@ -85,7 +134,7 @@ export const chapter4 = {
       <h2 class="chapter__title">Your Paycheck &amp; the Bracket Myth</h2>
       <div class="speech"><p>Where does ${formatExact(salary)} actually go? Watch. And yes — that Texas line is <strong>zero state income tax</strong>. I picked a good state to live in a lamp in.</p></div>
       ${waterfallHTML(salary)}
-      <div class="speech"><p>Now, the myth. "A raise pushed me into a higher bracket, so I took home less." <strong>Never true.</strong> Only the dollars <em>inside</em> the top bucket get the higher rate. Drag your income and watch.</p></div>
+      <div class="speech" id="sec-bracket-myth"><p>Now, the myth. "A raise pushed me into a higher bracket, so I took home less." <strong>Never true.</strong> Only the dollars <em>inside</em> the top bucket get the higher rate. Drag your income and watch.</p></div>
       <label class="slider">
         <input type="range" min="20000" max="250000" step="1000" value="${salary}" data-income />
       </label>
@@ -95,9 +144,9 @@ export const chapter4 = {
         effective <strong data-out="effective"></strong><br />
         Take-home <strong data-out="net"></strong> <span class="dim" data-out="delta"></span>
       </p>
-      <p class="dim">"Effective" is what you actually pay averaged across all your buckets — always lower than your top one.</p>
+      <p class="dim" id="sec-effective">"Effective" is what you actually pay averaged across all your buckets — always lower than your top one.</p>
       ${bucketsHTML()}
-      <div class="speech"><p>One more trick while we're here: your 6% goes in <em>before</em> federal tax. Contributing ${formatExact(contribution)} a year only shrinks your take-home by <strong>${formatExact(monthlyCost)} a month</strong> — while <strong>${formatExact(monthlyIntoAccount)} a month</strong> lands in your account, match included.</p></div>
+      <div class="speech" id="sec-pretax"><p>One more trick while we're here: your 6% goes in <em>before</em> federal tax. Contributing ${formatExact(contribution)} a year only shrinks your take-home by <strong>${formatExact(monthlyCost)} a month</strong> — while <strong>${formatExact(monthlyIntoAccount)} a month</strong> lands in your account, match included.</p></div>
       <p class="dim">2026 single-filer brackets, standard deduction, verified against IRS and SSA sources. Real Dollars everywhere else, real tax law here.</p>
     `;
 

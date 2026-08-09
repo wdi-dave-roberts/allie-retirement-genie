@@ -9,6 +9,7 @@ import { isEnrolled, setEnrolled } from "../lib/enrollment";
 import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
 import { contributionMonthly, employerMatchMonthly, futureValueOfStream } from "../lib/projection";
+import type { QuizSpec } from "../lib/quiz";
 
 const START_AGE = 32;
 const RETIRE_AGE = 65;
@@ -60,9 +61,90 @@ export function confetti(host: HTMLElement): void {
   setTimeout(() => burst.remove(), 2400);
 }
 
+/** Chapter 3 Quiz (WHI-96) — the yearly match figure is hers; a no-match plan gets concept questions instead. */
+export function quizCh3(profile: Profile): QuizSpec {
+  if (profile.matchPercent <= 0) {
+    return {
+      id: "ch3",
+      questions: [
+        {
+          prompt: "Your plan has no match — yet the 401k is still the first bucket because…",
+          choices: [
+            "It guarantees a fixed return",
+            "Money goes in before federal tax and compounds untouched for decades",
+            "It's insured against market losses",
+          ],
+          correctIndex: 1,
+          explain: "Pre-tax going in, decades of compounding — no match required.",
+          sectionRef: { chapter: 2, anchor: "sec-match" },
+        },
+        {
+          prompt: "An employer match, where plans offer one, is…",
+          choices: [
+            "Free money added when you contribute",
+            "A loan you repay at retirement",
+            "A fee for managing the account",
+          ],
+          correctIndex: 0,
+          explain: "Extra pay that only shows up when you put money in — which is why Chapter 7 has you confirm your plan's real formula.",
+          sectionRef: { chapter: 2, anchor: "sec-match" },
+        },
+        {
+          prompt: "How much match can anyone collect without enrolling?",
+          choices: ["The standard 6%", "Half the usual amount", "Zero — unenrolled means unmatched"],
+          correctIndex: 2,
+          explain: "Every match everywhere requires your dollars first.",
+          sectionRef: { chapter: 2, anchor: "sec-match" },
+        },
+      ],
+    };
+  }
+
+  const data = freeMoneyData(profile);
+  return {
+    id: "ch3",
+    questions: [
+      {
+        prompt: "At full capture, what's the match worth to you per year?",
+        choices: [
+          formatExact(data.matchMonthly), // mistaking the monthly figure for the annual one
+          formatExact(data.annualMatch * 2),
+          formatExact(data.annualMatch),
+        ],
+        correctIndex: 2,
+        explain: `100% of what you put in, up to ${profile.matchPercent}% of salary — ${formatExact(data.annualMatch)} of free money a year.`,
+        sectionRef: { chapter: 2, anchor: "sec-match" },
+      },
+      {
+        prompt: "Staying unenrolled while that match is on the table is like…",
+        choices: [
+          "Declining a raise on purpose",
+          "Dodging a tax bill",
+          "Avoiding stock-market risk",
+        ],
+        correctIndex: 0,
+        explain: "The match is pay you only collect by contributing.",
+        sectionRef: { chapter: 2, anchor: "sec-match" },
+      },
+      {
+        prompt: "A dollar you contribute inside the match does what the moment it arrives?",
+        choices: [
+          "Waits for the market to open",
+          "Doubles instantly — 100% return before any growth",
+          "Gets taxed as a bonus",
+        ],
+        correctIndex: 1,
+        explain: "Dollar-for-dollar match: yours plus theirs, on day one.",
+        sectionRef: { chapter: 2, anchor: "sec-double" },
+      },
+    ],
+  };
+}
+
 export const chapter3 = {
   id: "free-money",
   title: "Free Money",
+  quiz: (): QuizSpec => quizCh3(loadProfile()),
   render(root: HTMLElement): void {
     const profile = loadProfile();
     if (profile.salary <= 0) {
@@ -84,15 +166,15 @@ export const chapter3 = {
     );
 
     const matchBody = `
-        <div class="speech"><p>Your employer matches what you put in, up to ${profile.matchPercent}% of your salary. If your plan matches dollar-for-dollar — most do — being unenrolled means declining a <strong>${formatExact(data.annualMatch)}-a-year raise</strong>. On purpose. For no reason. (You'll confirm your plan's exact formula in Chapter 7 — it's on the checklist.)</p></div>
+        <div class="speech" id="sec-match"><p>Your employer matches what you put in, up to ${profile.matchPercent}% of your salary. If your plan matches dollar-for-dollar — most do — being unenrolled means declining a <strong>${formatExact(data.annualMatch)}-a-year raise</strong>. On purpose. For no reason. (You'll confirm your plan's exact formula in Chapter 7 — it's on the checklist.)</p></div>
         <div class="reveal">
           <p class="reveal__number" data-reveal>${formatMoney(data.compounded)}</p>
           <p>That's just the match — nothing of yours — compounded to 65, in today's dollars.</p>
         </div>
-        <div class="speech"><p>And here's the part banks dream about: at a dollar-for-dollar match, every dollar you put in up to ${profile.matchPercent}% <strong>doubles the moment it arrives</strong>. 100% return before the market even wakes up.</p></div>`;
+        <div class="speech" id="sec-double"><p>And here's the part banks dream about: at a dollar-for-dollar match, every dollar you put in up to ${profile.matchPercent}% <strong>doubles the moment it arrives</strong>. 100% return before the market even wakes up.</p></div>`;
 
     const noMatchBody = `
-        <div class="speech"><p>Your profile says no employer match. Rare, but it happens — and it changes nothing about the move. The 401k is still your best first bucket: your money goes in before federal tax (Chapter 4 shows that trick), and it compounds untouched for 33 years.</p></div>
+        <div class="speech" id="sec-match"><p>Your profile says no employer match. Rare, but it happens — and it changes nothing about the move. The 401k is still your best first bucket: your money goes in before federal tax (Chapter 4 shows that trick), and it compounds untouched for 33 years.</p></div>
         <div class="reveal">
           <p class="reveal__number" data-reveal>${formatMoney(ownCompounded)}</p>
           <p>That's your own ${DEFAULT_CONTRIBUTION_PERCENT}%, compounded to 65, in today's dollars — no match required.</p>

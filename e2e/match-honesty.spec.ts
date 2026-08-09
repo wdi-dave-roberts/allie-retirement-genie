@@ -33,6 +33,17 @@ test("match = 0: no fake raise, honest pivot, chapter still completes", async ({
   // "I'm in" still available and sticky.
   await page.getByRole("button", { name: "I'm in" }).click();
   await expect(page.getByRole("button", { name: /tap to take it back/ })).toBeVisible();
+
+  // No-match plans get concept questions — no invented dollar figures (WHI-96).
+  for (const answer of [
+    "Money goes in before federal tax and compounds untouched for decades",
+    "Free money added when you contribute",
+    "Zero — unenrolled means unmatched",
+  ]) {
+    await page.getByRole("radio", { name: answer }).check();
+  }
+  await page.locator("[data-quiz-submit]").click();
+  await expect(page.getByText("Nailed it")).toBeVisible();
   await page.getByRole("button", { name: "Complete chapter" }).click();
   await expect(page.getByRole("heading", { name: "Your Paycheck & the Bracket Myth" })).toBeVisible();
 });
