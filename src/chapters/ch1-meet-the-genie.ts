@@ -85,6 +85,14 @@ export function validateField(key: keyof Profile, raw: string): string | null {
   return null;
 }
 
+/** Gentle sanity nudge — informational, never blocking (WHI-94). */
+export const SPEND_SANITY_NUDGE =
+  "More goes out than comes in — typo, or a rough season? Either way, worth a double-check. No judgment; I live in a lamp.";
+
+export function spendExceedsIncome(salary: number, monthlySpend: number): boolean {
+  return salary > 0 && monthlySpend * 12 > salary;
+}
+
 const INTRO = [
   "Hi. I'm the Genie. I live in this lamp, and I know what you'll be worth in 2059.",
   "Most genies do three wishes. I do one, and it's a good one: I show you your own future — with your real numbers, not somebody's brochure.",
@@ -140,10 +148,19 @@ function renderIntake(root: HTMLElement, ctx: ChapterContext): void {
         <form data-question>
           ${fieldHTML(q, draft[q.key], true)}
           <p class="dim">${q.hint}</p>
+          <p class="dim" data-sanity hidden>${SPEND_SANITY_NUDGE}</p>
           <button class="btn btn--primary" type="submit">That's my number</button>
         </form>
       `;
       const form = root.querySelector<HTMLFormElement>("[data-question]")!;
+      if (q.key === "monthlySpend") {
+        const input = form.querySelector<HTMLInputElement>("input")!;
+        const sanity = form.querySelector<HTMLElement>("[data-sanity]")!;
+        input.addEventListener("input", () => {
+          const n = parseAmount(input.value);
+          sanity.hidden = !(n !== null && spendExceedsIncome(draft.salary, n));
+        });
+      }
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         const input = form.querySelector<HTMLInputElement>("input")!;
@@ -191,11 +208,23 @@ function renderEdit(root: HTMLElement): void {
         ${fieldHTML(q, profile[q.key], false, true)}
       `,
       ).join("")}
+      <p class="dim" data-sanity hidden>${SPEND_SANITY_NUDGE}</p>
       <button class="btn btn--primary" type="submit">Update my future</button>
       <p class="dim" data-saved hidden>Done. The future noticed.</p>
     </form>
   `;
   const form = root.querySelector<HTMLFormElement>("[data-edit]")!;
+  {
+    const inputs = [...form.querySelectorAll<HTMLInputElement>("input")];
+    const sanity = form.querySelector<HTMLElement>("[data-sanity]")!;
+    const check = (): void => {
+      const salary = parseAmount(inputs[0]!.value) ?? 0;
+      const spend = parseAmount(inputs[1]!.value) ?? 0;
+      sanity.hidden = !spendExceedsIncome(salary, spend);
+    };
+    for (const input of inputs) input.addEventListener("input", check);
+    check(); // stored profile may already trip it
+  }
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const inputs = [...form.querySelectorAll<HTMLInputElement>("input")];

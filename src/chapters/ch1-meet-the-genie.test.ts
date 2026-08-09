@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fieldHTML, parseAmount, QUESTIONS, validateField } from "./ch1-meet-the-genie";
+import { fieldHTML, parseAmount, QUESTIONS, spendExceedsIncome, validateField } from "./ch1-meet-the-genie";
 
 describe("parseAmount", () => {
   it("parses plain and formatted amounts", () => {
@@ -54,5 +54,14 @@ describe("fieldHTML", () => {
 
   it("renders stored zero verbatim in edit mode (regression: zero savings blocked all edits)", () => {
     expect(fieldHTML(savings, 0, false, true)).toContain('value="0"');
+  });
+});
+
+describe("spendExceedsIncome", () => {
+  it("trips only when spend x 12 exceeds salary", () => {
+    expect(spendExceedsIncome(40000, 9000)).toBe(true);
+    expect(spendExceedsIncome(85000, 3800)).toBe(false);
+    expect(spendExceedsIncome(48000, 4000)).toBe(false); // exactly equal — no nudge
+    expect(spendExceedsIncome(0, 5000)).toBe(false); // no salary yet, nothing to compare
   });
 });
