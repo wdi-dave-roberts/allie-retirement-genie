@@ -19,6 +19,12 @@ The build/review loops merge PRs on GitHub; nothing pulls here automatically
 the behind-count first.** A stale local main burned a full UAT pass on
 2026-08-09.
 
+## Build loop
+
+Runs plain `loop-build` (project-scoped) on a cron. Don't add `cap:*` filters
+here — this is a single-capability project, so a cap filter adds nothing, and
+a stale one matching zero labels makes the cron skip every issue forever.
+
 ## Commands
 
 - `pnpm test` — vitest (excludes `e2e/` and `.claude/` loop worktrees)
