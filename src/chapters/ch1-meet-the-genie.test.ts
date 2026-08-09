@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseAmount, validateField } from "./ch1-meet-the-genie";
+import { fieldHTML, parseAmount, QUESTIONS, validateField } from "./ch1-meet-the-genie";
 
 describe("parseAmount", () => {
   it("parses plain and formatted amounts", () => {
@@ -42,5 +42,17 @@ describe("validateField", () => {
     expect(validateField("currentSavings", "-5")).not.toBeNull();
     expect(validateField("salary", "9999999999")).not.toBeNull();
     expect(validateField("matchPercent", "80")).not.toBeNull();
+  });
+});
+
+describe("fieldHTML", () => {
+  const savings = QUESTIONS.find((q) => q.key === "currentSavings")!;
+
+  it("hides zero during intake (empty = unanswered)", () => {
+    expect(fieldHTML(savings, 0, false)).toContain('value=""');
+  });
+
+  it("renders stored zero verbatim in edit mode (regression: zero savings blocked all edits)", () => {
+    expect(fieldHTML(savings, 0, false, true)).toContain('value="0"');
   });
 });

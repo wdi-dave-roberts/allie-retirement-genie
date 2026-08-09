@@ -98,8 +98,9 @@ function isProfileComplete(p: Profile): boolean {
   return p.salary > 0 && p.monthlySpend > 0;
 }
 
-function fieldHTML(q: Question, value: number, autofocus: boolean): string {
-  const shown = value > 0 || q.key === "matchPercent" ? String(value) : "";
+export function fieldHTML(q: Question, value: number, autofocus: boolean, verbatim = false): string {
+  // Intake hides zero (empty = unanswered); edit mode shows stored values as-is.
+  const shown = verbatim || value > 0 || q.key === "matchPercent" ? String(value) : "";
   return `
     <label class="field">
       <span class="field__unit">${q.unit}</span>
@@ -187,7 +188,7 @@ function renderEdit(root: HTMLElement): void {
       ${QUESTIONS.map(
         (q) => `
         <p class="dim">${q.ask}</p>
-        ${fieldHTML(q, profile[q.key], false)}
+        ${fieldHTML(q, profile[q.key], false, true)}
       `,
       ).join("")}
       <button class="btn btn--primary" type="submit">Update my future</button>
