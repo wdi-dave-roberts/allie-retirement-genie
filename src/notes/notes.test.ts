@@ -56,6 +56,43 @@ describe("chapter note content (WHI-100)", () => {
   });
 });
 
+describe("chapter note content (WHI-101)", () => {
+  const CH5_7 = [
+    "ch5-roth-vs-traditional",
+    "ch5-tax-free-growth",
+    "ch6-hysa",
+    "ch6-index-fund",
+    "ch6-target-date-fund",
+    "ch6-expense-ratio",
+    "ch7-contribution-limit",
+    "ch7-raise-assumption",
+  ];
+
+  it("registers all eight Chapter 5-7 notes, well-formed", () => {
+    for (const id of CH5_7) {
+      const note = getNote(id)!;
+      expect(note, id).toBeDefined();
+      expect(note.term.length, id).toBeGreaterThan(0);
+      // 2-3 sentences, Genie-short.
+      const sentences = note.body.split(/[.!?](?:\s|$)/).filter((s) => s.trim().length > 0);
+      expect(sentences.length, id).toBeGreaterThanOrEqual(2);
+      expect(sentences.length, id).toBeLessThanOrEqual(3);
+      if (note.dive) expect(note.dive.url, id).toMatch(/^https:\/\//);
+    }
+  });
+
+  it("keeps the load-bearing figures exact", () => {
+    expect(getNote("ch7-contribution-limit")?.body).toContain("$24,500"); // IRS, 2026
+    expect(getNote("ch6-hysa")?.body).toContain("$250,000"); // FDIC standard coverage
+    expect(getNote("ch6-expense-ratio")?.body).toContain("0.03%");
+  });
+
+  it("stays within the app-wide note budget alongside Ch1-4", () => {
+    const chapterNotes = Object.keys(NOTES).filter((id) => !id.startsWith("demo-"));
+    expect(chapterNotes.length).toBeLessThanOrEqual(20); // 15-20 budget, both content waves
+  });
+});
+
 describe("noteRef", () => {
   it("renders a trigger for known notes and degrades to text for unknown ids", () => {
     expect(noteRef("demo-compounding")).toContain('data-genie-note="demo-compounding"');

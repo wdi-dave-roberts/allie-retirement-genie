@@ -6,6 +6,7 @@
 import { genieSVG } from "../genie/genie";
 import { isRothCheckFlagged, setRothCheckFlagged } from "../lib/enrollment";
 import type { QuizSpec } from "../lib/quiz";
+import { noteRef } from "../notes/genie-note";
 
 /** Chapter 5 Quiz (WHI-97) — static: the one difference, the pick, the match. */
 export function quizCh5(): QuizSpec {
@@ -63,7 +64,7 @@ export const chapter5 = {
         <div class="speech" id="sec-difference"><p>Deep breath. This one has a reputation, and it doesn't deserve it. There is exactly one difference: <strong>when the tax collector says hello.</strong></p></div>
         <div class="paths">
           <div class="path">
-            <h3 class="path__title">Roth</h3>
+            <h3 class="path__title">${noteRef("ch5-roth-vs-traditional", "Roth")}</h3>
             <ol class="path__steps">
               <li>Tax bites your dollar <strong>now</strong></li>
               <li>It grows for 33 years</li>
@@ -71,7 +72,7 @@ export const chapter5 = {
             </ol>
           </div>
           <div class="path">
-            <h3 class="path__title">Traditional</h3>
+            <h3 class="path__title">${noteRef("ch5-roth-vs-traditional", "Traditional")}</h3>
             <ol class="path__steps">
               <li>Whole dollar goes in <strong>untaxed</strong></li>
               <li>It grows for 33 years</li>
@@ -80,7 +81,7 @@ export const chapter5 = {
           </div>
         </div>
         <div class="speech"><p>Same dollar, same growth, same math — the only question is whether your tax rate is lower today or at 65. You're 32, single, with decades of raises ahead. Today is probably the cheapest tax you will ever pay.</p></div>
-        <div class="speech speech--recommendation" id="sec-recommendation"><p><strong>My recommendation: pick Roth if your plan offers a Roth 401k.</strong> Your rate today is likely the lowest it'll ever be, and 33 years of growth walks out tax-free. No Roth option? Traditional is still a clear win — and the match is pre-tax either way, so nothing about this choice should delay enrolling.</p></div>
+        <div class="speech speech--recommendation" id="sec-recommendation"><p><strong>My recommendation: pick Roth if your plan offers a Roth 401k.</strong> Your rate today is likely the lowest it'll ever be, and 33 years of growth ${noteRef("ch5-tax-free-growth", "walks out tax-free")}. No Roth option? Traditional is still a clear win — and the match is pre-tax either way, so nothing about this choice should delay enrolling.</p></div>
         <button class="btn ${flagged ? "btn--ghost" : "btn--primary"}" data-roth-check>
           ${flagged ? "On my checklist ✓" : "Remind me: does my plan have Roth?"}
         </button>

@@ -15,6 +15,7 @@ import {
   futureValueOfStream,
 } from "../lib/projection";
 import { correctCount, isDone, loadQuizState, type QuizSpec } from "../lib/quiz";
+import { noteRef } from "../notes/genie-note";
 import { uniqueDistractors } from "../quiz/choices";
 import { finalExam } from "../quiz/exam";
 import { renderQuiz } from "../quiz/quiz-ui";
@@ -184,6 +185,7 @@ export const chapter7 = {
         <label>Raises <strong data-lv="raise"></strong>/yr
           <input type="range" min="0" max="5" step="0.5" value="${levers.raisePercent}" data-lever="raisePercent" /></label>
       </div>
+      <p class="dim">Fine print: yearly 401k deposits have a ${noteRef("ch7-contribution-limit", "contribution limit")} — you've got room — and I start the raise lever at a humble ${noteRef("ch7-raise-assumption", "2% a year")}.</p>
       <div class="reveal reveal--instant">
         <p class="reveal__number" data-balance></p>
         <p>yours at <span data-retire-age></span>, in today's dollars</p>
