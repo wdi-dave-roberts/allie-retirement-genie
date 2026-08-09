@@ -10,6 +10,12 @@ export interface Series {
   className: string;
 }
 
+export interface AxisLabel {
+  /** Position in data space (same axis as point x values). */
+  x: number;
+  text: string;
+}
+
 export interface LineChartOptions {
   series: Series[];
   width?: number;
@@ -17,6 +23,8 @@ export interface LineChartOptions {
   padding?: number;
   /** Accessible description of the chart. */
   label: string;
+  /** Optional x-axis markers rendered under the plot (WHI-104). */
+  xLabels?: AxisLabel[];
 }
 
 export function lineChart(opts: LineChartOptions): string {
@@ -33,14 +41,19 @@ export function lineChart(opts: LineChartOptions): string {
   const xSpan = xMax - xMin || 1;
   const ySpan = yMax - yMin || 1;
 
+  // With axis labels, the plot cedes a strip at the bottom for the text row.
+  const labelStrip = opts.xLabels?.length ? 16 : 0;
+  const floor = height - pad - labelStrip;
+
   const toX = (x: number): number => pad + ((x - xMin) / xSpan) * (width - 2 * pad);
   // A flat series (e.g. $0 balance at 0% contribution) would otherwise pin to
-  // the viewBox floor and read as a rendering failure — center it so a
-  // flat-but-real projection looks deliberate (WHI-103).
+  // the plot floor and read as a rendering failure — center it in the plot
+  // area (label-strip aware) so a flat-but-real projection looks deliberate
+  // (WHI-103).
   const flat = Math.min(...ys) === yMax;
   const toY = flat
-    ? (): number => height / 2
-    : (y: number): number => height - pad - ((y - yMin) / ySpan) * (height - 2 * pad);
+    ? (): number => (pad + floor) / 2
+    : (y: number): number => floor - ((y - yMin) / ySpan) * (floor - pad);
 
   const lines = opts.series
     .map((s) => {
@@ -49,5 +62,12 @@ export function lineChart(opts: LineChartOptions): string {
     })
     .join("");
 
-  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${opts.label}">${lines}</svg>`;
+  const labels = (opts.xLabels ?? [])
+    .map(
+      (l) =>
+        `<text class="curve__axis-label" x="${toX(l.x).toFixed(1)}" y="${height - 3}" text-anchor="middle">${l.text}</text>`,
+    )
+    .join("");
+
+  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${opts.label}">${lines}${labels}</svg>`;
 }
