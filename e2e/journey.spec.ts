@@ -26,6 +26,8 @@ test("full journey: intake → seven chapters → celebration → resume", async
 
   // — Chapter 2: The Curve —
   await expect(page.getByRole("heading", { name: "The Curve" })).toBeVisible();
+  // Both 6%s are introduced before the chart uses them (WHI-89).
+  await expect(page.getByText("Quick setup first")).toBeVisible();
   await expect(page.getByText("start now → $803K")).toBeVisible();
   await expect(page.getByText("$448K", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Complete chapter" }).click();
