@@ -3,6 +3,7 @@
  * tokens via classes only; no colors live in chapter code.
  */
 
+import type { QuizSpec } from "../lib/quiz";
 import { chapter1 } from "./ch1-meet-the-genie";
 import { chapter2 } from "./ch2-the-curve";
 import { chapter3 } from "./ch3-free-money";
@@ -21,6 +22,12 @@ export interface Chapter {
   title: string;
   /** Self-paced chapters drive their own completion; the shell hides its button. */
   selfPaced?: boolean;
+  /**
+   * End-of-chapter Quiz; completing it (pass or Answer Key seen) is what
+   * completes the Chapter. Built at render time so questions can use the
+   * live Profile.
+   */
+  quiz?: () => QuizSpec;
   render(root: HTMLElement, ctx: ChapterContext): void;
 }
 

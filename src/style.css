@@ -635,6 +635,134 @@ form .btn {
   color: var(--text-dim);
 }
 
+/* Quiz — Chapter Quizzes and the Final Exam run on the same machinery.
+   Results never rely on color alone: every mark pairs ✓/✕ with a word. */
+.quiz {
+  background: var(--night-800);
+  border: 1px solid var(--night-600);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.quiz__title {
+  margin: 0;
+}
+
+.quiz__tries {
+  color: var(--text-dim);
+  font-size: var(--step--1);
+  margin: 0;
+}
+
+.quiz__q {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.quiz__prompt {
+  font-weight: 700;
+  color: var(--star);
+  padding: 0 0 var(--space-2);
+}
+
+.quiz__choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--night-600);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  min-height: 48px;
+  cursor: pointer;
+}
+
+.quiz__choice input {
+  accent-color: var(--lamp-gold);
+}
+
+.quiz__choice input:disabled {
+  cursor: default;
+}
+
+.quiz__choice--right {
+  border-color: var(--success);
+}
+
+.quiz__choice--wrong {
+  border-color: var(--danger);
+}
+
+.quiz__mark {
+  margin-left: auto;
+  font-size: var(--step--1);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.quiz__mark--right {
+  color: var(--success);
+}
+
+.quiz__mark--wrong {
+  color: var(--danger);
+}
+
+.quiz__result {
+  color: var(--success);
+  font-weight: 700;
+  margin: 0;
+}
+
+.quiz__key {
+  border-top: 1px solid var(--night-600);
+  padding-top: var(--space-3);
+}
+
+.quiz__key-item {
+  margin-bottom: var(--space-3);
+}
+
+.quiz__key-q {
+  font-weight: 700;
+  color: var(--star);
+  margin: 0 0 var(--space-1);
+}
+
+.quiz__key-a {
+  margin: 0 0 var(--space-1);
+}
+
+.quiz__key-why {
+  color: var(--text-dim);
+  font-size: var(--step--1);
+  margin: 0 0 var(--space-1);
+}
+
+.quiz__link {
+  font: inherit;
+  font-size: var(--step--1);
+  background: none;
+  border: 0;
+  color: var(--lamp-gold);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Floating way back after a Section Link jump */
+.quiz-return {
+  position: fixed;
+  bottom: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
 /* Bracket buckets (Chapter 4) */
 .slider input {
   width: 100%;
