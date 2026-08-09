@@ -757,6 +757,12 @@ form .btn {
   padding: 0;
 }
 
+.quiz__hint {
+  display: block;
+  margin-top: var(--space-1);
+  text-align: left;
+}
+
 /* Floating way back after a Section Link jump */
 .quiz-return {
   position: fixed;

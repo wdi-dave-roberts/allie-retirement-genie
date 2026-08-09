@@ -24,12 +24,20 @@ test("three wrong tries: marks, editable wrongs, locked rights, Answer Key", asy
   await expect(page.getByText("✕ not yet")).toHaveCount(3);
   await expect(page.getByText("Try 2 of 3")).toBeVisible();
   for (const label of WRONG) await expect(page.getByRole("radio", { name: label })).toBeEnabled();
+  await expect(page.locator(".quiz__hint")).toHaveCount(0); // no hints after Try 1 (WHI-106)
 
   // Try 2 — fix only Q1: it locks green, the others stay red and editable.
   await page.getByRole("radio", { name: RIGHT[0]! }).check();
   await page.locator("[data-quiz-submit]").click();
   await expect(page.getByText("✓ right")).toHaveCount(1);
   await expect(page.getByText("✕ not yet")).toHaveCount(2);
+
+  // Failed Try 2: still-wrong questions grow a re-read hint; the locked one doesn't (WHI-106).
+  await expect(page.locator(".quiz__hint")).toHaveCount(2);
+  await expect(page.locator('fieldset[data-q="0"] .quiz__hint')).toHaveCount(0);
+  await page.locator('fieldset[data-q="1"] .quiz__hint').click();
+  await expect(page.locator("#demo-lamp-rules")).toBeInViewport();
+  await expect(page.getByText("✕ not yet")).toHaveCount(2); // quiz state untouched by the jump
   for (const radio of await page.locator('fieldset[data-q="0"] input').all()) {
     await expect(radio).toBeDisabled();
   }

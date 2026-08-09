@@ -64,10 +64,17 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
               </label>`;
           })
           .join("");
+        // After a failed second Try, still-wrong questions offer the Section
+        // Link early — guidance mid-funnel without revealing the answer (WHI-106).
+        const hint =
+          !done && state.tries === 2 && state.submitted[i] !== null && !locked
+            ? `<button class="quiz__link quiz__hint" data-section-link="${i}">Still unsure? Tap to re-read that part</button>`
+            : "";
         return `
           <fieldset class="quiz__q" data-q="${i}">
             <legend class="quiz__prompt">${i + 1}. ${q.prompt}</legend>
             ${choices}
+            ${hint}
           </fieldset>`;
       })
       .join("");
