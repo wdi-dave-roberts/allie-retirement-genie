@@ -1,15 +1,14 @@
 /**
- * Chapter registry — 7 Chapters, placeholder content for now. Real content
- * lands in the per-chapter issues (WHI-76..82). Placeholders consume design
+ * Chapter registry — all 7 Chapters (WHI-76..82). Chapters consume design
  * tokens via classes only; no colors live in chapter code.
  */
 
-import { genieSVG, type GeniePose } from "../genie/genie";
 import { chapter1 } from "./ch1-meet-the-genie";
 import { chapter2 } from "./ch2-the-curve";
 import { chapter3 } from "./ch3-free-money";
 import { chapter4 } from "./ch4-paycheck";
 import { chapter5 } from "./ch5-roth";
+import { chapter6 } from "./ch6-where-money-lives";
 import { chapter7 } from "./ch7-lever-room";
 
 export interface ChapterContext {
@@ -25,33 +24,12 @@ export interface Chapter {
   render(root: HTMLElement, ctx: ChapterContext): void;
 }
 
-function placeholder(kicker: string, title: string, line: string, pose: GeniePose): (root: HTMLElement) => void {
-  return (root) => {
-    root.innerHTML = `
-      <div class="chapter__genie">${genieSVG(pose)}</div>
-      <p class="chapter__kicker">${kicker}</p>
-      <h2 class="chapter__title">${title}</h2>
-      <div class="speech"><p>${line}</p></div>
-      <p class="dim">Placeholder — this Chapter's real content is on its way.</p>
-    `;
-  };
-}
-
 export const chapters: Chapter[] = [
   chapter1,
   chapter2,
   chapter3,
   chapter4,
   chapter5,
-  {
-    id: "where-money-lives",
-    title: "Where Money Lives",
-    render: placeholder(
-      "Chapter 6",
-      "Where Money Lives",
-      "An account is a bucket, not an investment. What you put in the bucket is the magic.",
-      "idle",
-    ),
-  },
+  chapter6,
   chapter7,
 ];
