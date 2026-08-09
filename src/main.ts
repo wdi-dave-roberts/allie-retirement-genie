@@ -71,6 +71,7 @@ function render(): void {
         render();
       }
     },
+    gotoSection,
   });
 
   if (quiz) {
