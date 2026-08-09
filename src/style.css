@@ -200,3 +200,79 @@ p {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* The Curve (Chapter 2) */
+.curve {
+  margin: 0;
+}
+
+.curve svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.curve__line {
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: curve-draw 1.4s ease-out forwards;
+}
+
+.curve__line--now {
+  stroke: var(--lamp-gold);
+}
+
+.curve__line--later {
+  stroke: var(--night-600);
+  animation-delay: 0.3s;
+}
+
+@keyframes curve-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.curve__legend {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--step--1);
+  padding-top: var(--space-1);
+}
+
+.curve__key--now {
+  color: var(--lamp-gold);
+}
+
+.curve__key--later {
+  color: var(--text-dim);
+}
+
+/* The Reveal */
+.reveal {
+  text-align: center;
+  opacity: 0;
+  animation: reveal-in 0.6s ease-out 1.5s forwards;
+}
+
+.reveal__number {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  color: var(--lamp-gold);
+  margin: 0;
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
