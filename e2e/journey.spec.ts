@@ -44,6 +44,8 @@ test("full journey: intake → seven chapters → celebration → resume", async
   await expect(page.getByRole("heading", { name: "Your Paycheck & the Bracket Myth" })).toBeVisible();
   await expect(page.getByText("$43,962").first()).toBeVisible(); // take-home
   await expect(page.getByText("$229 a month")).toBeVisible(); // pre-tax trick
+  // "Effective" is defined right at the readout (WHI-92).
+  await expect(page.getByText("averaged across all your buckets")).toBeVisible();
   await page.getByRole("button", { name: "Complete chapter" }).click();
 
   // — Chapter 5: Roth vs Traditional —
