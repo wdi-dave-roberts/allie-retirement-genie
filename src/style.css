@@ -317,3 +317,42 @@ p {
     opacity: 0;
   }
 }
+
+/* Roth vs Traditional paths (Chapter 5) */
+.paths {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.path {
+  background: var(--night-800);
+  border: 1px solid var(--night-600);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.path__title {
+  font-size: var(--step-1);
+  color: var(--lamp-gold);
+  text-align: center;
+  margin-bottom: var(--space-2);
+}
+
+.path__steps {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: var(--step--1);
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.path__steps strong {
+  color: var(--text);
+}
+
+.speech--recommendation {
+  border-color: var(--lamp-gold);
+}
