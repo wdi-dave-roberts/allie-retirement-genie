@@ -8,6 +8,8 @@ import {
 } from "./lib/progress";
 import { isDone, loadQuizState, type SectionRef } from "./lib/quiz";
 import { clearAllState } from "./lib/reset";
+import { initGenieNotes } from "./notes/genie-note";
+import { renderNoteDemo } from "./notes/demo";
 import { renderQuizDemo } from "./quiz/demo";
 import { renderQuiz } from "./quiz/quiz-ui";
 
@@ -135,8 +137,13 @@ function gotoSection(ref: SectionRef): void {
   document.getElementById(ref.anchor)?.scrollIntoView({ block: "start" });
 }
 
-if (new URLSearchParams(location.search).has("quiz-demo")) {
+initGenieNotes();
+
+const params = new URLSearchParams(location.search);
+if (params.has("quiz-demo")) {
   renderQuizDemo(app);
+} else if (params.has("note-demo")) {
+  renderNoteDemo(app);
 } else {
   render();
 }
