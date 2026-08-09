@@ -772,7 +772,8 @@ form .btn {
   background: none;
   border: 0;
   padding: 0;
-  color: inherit;
+  /* Accent + dotted underline: visibly tappable without shouting (WHI-105). */
+  color: var(--note-accent);
   cursor: pointer;
   border-bottom: 2px dotted var(--note-accent);
 }
