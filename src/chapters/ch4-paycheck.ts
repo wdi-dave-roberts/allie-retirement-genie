@@ -94,7 +94,7 @@ export function quizCh4(profile: Profile): QuizSpec {
         sectionRef: { chapter: 3, anchor: "sec-effective" },
       },
       {
-        prompt: `Putting ${formatExact(contribution)} a year (6%) into your 401k shrinks your monthly take-home by about…`,
+        prompt: `Putting ${formatExact(contribution / 12)} a month (6%) into your 401k shrinks your monthly take-home by about…`,
         choices: [cost, ...distractors],
         correctIndex: 0,
         explain: "The contribution leaves before federal tax, so your paycheck drops by less than the full amount.",
@@ -147,7 +147,7 @@ export const chapter4 = {
       </p>
       <p class="dim" id="sec-effective">"Effective" is what you actually pay averaged across all your buckets — always lower than your top one.</p>
       ${bucketsHTML()}
-      <div class="speech" id="sec-pretax"><p>One more trick while we're here: your 6% goes in <em>before</em> federal tax. Contributing ${formatExact(contribution)} a year only shrinks your take-home by <strong>${formatExact(monthlyCost)} a month</strong> — while <strong>${formatExact(monthlyIntoAccount)} a month</strong> lands in your account, match included.</p></div>
+      <div class="speech" id="sec-pretax"><p>One more trick while we're here: your 6% goes in <em>before</em> federal tax. That's ${formatExact(contribution / 12)} a month (${formatExact(contribution)} a year) — but your take-home only drops <strong>${formatExact(monthlyCost)} a month</strong>, while <strong>${formatExact(monthlyIntoAccount)} a month</strong> lands in your account, match included.</p></div>
       <p class="dim">2026 single-filer brackets, ${noteRef("ch4-standard-deduction", "standard deduction")}, verified against IRS and SSA sources. Real Dollars everywhere else, real tax law here.</p>
     `;
 
