@@ -1,0 +1,202 @@
+/* Design tokens — night-sky palette with lamp-gold accent.
+   Single committed dark look (per WHI-75: no light mode). */
+:root {
+  /* Color */
+  --night-950: #070a1a;
+  --night-900: #0b1026;
+  --night-800: #141b3d;
+  --night-700: #1f2a56;
+  --night-600: #2e3c74;
+  --star: #e8ecff;
+  --lamp-gold: #f5b942;
+  --lamp-gold-soft: #f8d189;
+  --lamp-gold-dim: rgba(245, 185, 66, 0.18);
+  --text: #eef1ff;
+  --text-dim: #a6adce;
+  --success: #7dd9a6;
+  --danger: #f28b82;
+
+  /* Typography */
+  --font-display: "Georgia", "Times New Roman", serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --step--1: 0.85rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: 2.1rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  /* Shape */
+  --radius: 12px;
+  --radius-pill: 999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at top, var(--night-800), var(--night-950) 70%);
+  min-height: 100svh;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--star);
+  line-height: 1.2;
+  margin: 0 0 var(--space-3);
+}
+
+h1 {
+  font-size: var(--step-3);
+}
+
+h2 {
+  font-size: var(--step-2);
+}
+
+p {
+  margin: 0 0 var(--space-3);
+}
+
+.dim {
+  color: var(--text-dim);
+  font-size: var(--step--1);
+}
+
+/* Progress bar — 7 chapter segments */
+.progress {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+.progress__seg {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--night-700);
+  transition: background 0.4s ease;
+}
+
+.progress__seg--complete {
+  background: var(--lamp-gold);
+}
+
+.progress__seg--current {
+  background: var(--lamp-gold-soft);
+  box-shadow: 0 0 8px var(--lamp-gold-dim);
+}
+
+/* Chapter card */
+.chapter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: chapter-in 0.35s ease;
+}
+
+@keyframes chapter-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.chapter__genie {
+  width: 120px;
+  margin: var(--space-3) auto 0;
+}
+
+.chapter__genie svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chapter__kicker {
+  text-align: center;
+  color: var(--lamp-gold);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.chapter__title {
+  text-align: center;
+}
+
+.speech {
+  background: var(--night-800);
+  border: 1px solid var(--night-600);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) 0 var(--space-4);
+}
+
+.btn {
+  font: inherit;
+  border: 0;
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.btn--primary {
+  flex: 1;
+  background: var(--lamp-gold);
+  color: var(--night-950);
+  font-weight: 700;
+}
+
+.btn--primary:active {
+  background: var(--lamp-gold-soft);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--night-600);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
