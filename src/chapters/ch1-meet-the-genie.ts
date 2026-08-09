@@ -100,7 +100,9 @@ export function spendExceedsIncome(salary: number, monthlySpend: number): boolea
 const INTRO = [
   "Hi. I'm the Genie. I live in this lamp, and I know what you'll be worth in 2059.",
   "Most genies do three wishes. I do one, and it's a good one: I show you your own future — with your real numbers, not somebody's brochure.",
-  "Seven chapters, about 25 minutes. First I need four numbers.",
+  "First I need four numbers — salary, monthly spending, current savings, employer match. Every chart in the chapters ahead is built from them.",
+  "House rule before anything: your numbers stay on this phone. No account, no cloud, nobody else. Not even me, and I live here.",
+  "Seven chapters, about 25 minutes. That's the whole deal.",
 ];
 
 const PRIVACY =
@@ -136,7 +138,7 @@ export function quizCh1(): QuizSpec {
       },
       {
         prompt: "Which of these do I actually know about you?",
-        choices: ["Your name", "Your Social Security number", "Your monthly spending"],
+        choices: ["Your email address", "Your Social Security number", "Your monthly spending"],
         correctIndex: 2,
         explain: "Four numbers, zero identity — I can see your future and still couldn't pick you out of a lineup.",
         sectionRef: privacy,
