@@ -958,16 +958,44 @@ form .btn {
 .buckets {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
+/* Each row carries the lesson: rate, the slice of income it holds, and the
+   dollars-in/tax-out it produces (WHI-111). */
 .bucket {
-  display: grid;
-  grid-template-columns: 3rem 1fr;
-  align-items: center;
-  gap: var(--space-2);
   font-size: var(--step--1);
   color: var(--text-dim);
+}
+
+.bucket__label,
+.bucket__note {
+  margin: 0;
+  /* Long labels wrap instead of pushing the row sideways at 320px. */
+  overflow-wrap: anywhere;
+}
+
+.bucket__rate {
+  font-weight: 700;
+  color: var(--star);
+}
+
+.bucket__badge {
+  color: var(--lamp-gold);
+  white-space: nowrap;
+}
+
+.bucket__note {
+  padding-top: 2px;
+  opacity: 0.8;
+}
+
+.bucket-sum {
+  font-size: var(--step--1);
+  color: var(--star);
+  border-top: 1px solid var(--night-700);
+  padding-top: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .bucket__track {
@@ -989,7 +1017,6 @@ form .btn {
   background: var(--lamp-gold);
 }
 
-.bucket--top .bucket__label {
+.bucket--top .bucket__rate {
   color: var(--lamp-gold);
-  font-weight: 700;
 }
