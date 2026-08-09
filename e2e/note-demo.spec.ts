@@ -50,3 +50,14 @@ test("deeper dive: new tab, noopener; notes without one show no footer", async (
   await page.locator("[data-note-close]").tap();
   await expect(page.locator(".genie-note-popup")).toBeHidden();
 });
+
+test("triggers carry the accent affordance color, not the prose color (WHI-105)", async ({ page }) => {
+  await page.goto("./?note-demo");
+  const trigger = page.locator('[data-genie-note="demo-compounding"]');
+  // --note-accent → --lamp-gold-soft (#f8d189)
+  await expect(trigger).toHaveCSS("color", "rgb(248, 209, 137)");
+  const proseColor = await page
+    .locator(".speech p")
+    .evaluate((el) => getComputedStyle(el).color);
+  expect(proseColor).not.toBe("rgb(248, 209, 137)");
+});
