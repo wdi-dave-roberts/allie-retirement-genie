@@ -22,7 +22,17 @@ export function loadCurrent(): number {
 }
 
 export function saveCurrent(index: number): void {
-  localStorage.setItem(KEY, String(index));
+  // Monotonic: a stale tab's write must never rewind real progress (WHI-102).
+  localStorage.setItem(KEY, String(Math.max(index, loadCurrent())));
+}
+
+/** Raw stored value; storage errors read as "0" (unreadable ≠ reset). */
+function storedRaw(): string | null {
+  try {
+    return localStorage.getItem(KEY);
+  } catch {
+    return "0";
+  }
 }
 
 export function clearProgress(): void {
@@ -38,6 +48,9 @@ export function statusOf(index: number, current: number): ChapterStatus {
 /** Advance past `index` if it is the current chapter. Returns the new current. */
 export function completeChapter(index: number, current: number): number {
   if (index !== current) return current;
+  // Progress key gone while this tab holds progress = another tab Reset;
+  // advancing would write pre-Reset state back into the wiped store (WHI-102).
+  if (current > 0 && storedRaw() === null) return current;
   const next = Math.min(index + 1, CHAPTER_COUNT - 1);
   saveCurrent(next);
   return next;
