@@ -137,6 +137,11 @@ export const chapter7 = {
         <p class="reveal__number" data-balance></p>
         <p>yours at <span data-retire-age></span>, in today's dollars</p>
       </div>
+      <p class="dim">Bigger than Chapter 2's curve? Yes — this one counts ${
+        profile.currentSavings > 0
+          ? `your ${formatMoney(profile.currentSavings)} head start and your raises`
+          : "your raises too"
+      }. Everything you've got working for you, all at once.</p>
       <figure class="curve" data-chart></figure>
       <h2>The Action Checklist</h2>
       <div class="speech"><p>Playtime's over — here's the whole ritual. Twenty minutes, one lifetime of difference.</p></div>
