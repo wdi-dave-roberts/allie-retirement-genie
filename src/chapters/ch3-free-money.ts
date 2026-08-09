@@ -11,6 +11,7 @@ import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
 import { contributionMonthly, employerMatchMonthly, futureValueOfStream } from "../lib/projection";
 import type { QuizSpec } from "../lib/quiz";
+import { paintRange } from "../lib/range";
 import { noteRef } from "../notes/genie-note";
 
 const START_AGE = 32;
@@ -255,6 +256,7 @@ export const chapter3 = {
       const slider = root.querySelector<HTMLInputElement>("[data-forfeit]");
       if (!slider) return; // no-match plans skip the whole beat
       slider.value = String(forfeitPercent);
+      paintRange(slider);
       const f = forfeitData(profile, forfeitPercent);
       const full = forfeitPercent >= profile.matchPercent;
 
