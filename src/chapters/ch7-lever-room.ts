@@ -14,7 +14,10 @@ import {
   employerMatchMonthly,
   futureValueOfStream,
 } from "../lib/projection";
-import { confetti } from "./ch3-free-money";
+import { isDone, loadQuizState, type QuizSpec } from "../lib/quiz";
+import { uniqueDistractors } from "../quiz/choices";
+import { renderQuiz } from "../quiz/quiz-ui";
+import { confetti, formatExact } from "./ch3-free-money";
 
 export const CURRENT_AGE = 32;
 
@@ -95,6 +98,52 @@ function defaultDoneBy(): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Chapter 7 Quiz (WHI-97) — the levers, her monthly all-in figure at the
+ * chapter's starting contribution percent, and the ritual's first step.
+ */
+export function quizCh7(profile: Profile, contributionPercent: number): QuizSpec {
+  const total =
+    contributionMonthly(profile.salary, contributionPercent) +
+    employerMatchMonthly(profile.salary, contributionPercent, profile.matchPercent);
+  const totalFmt = formatExact(total);
+  const distractors = uniqueDistractors(totalFmt, [
+    formatExact(contributionMonthly(profile.salary, contributionPercent)), // forgetting the match
+    formatExact(total * 2),
+    formatExact(total * 3),
+  ]);
+  return {
+    id: "ch7",
+    questions: [
+      {
+        prompt: "Of the three levers, the one that swings your number hardest is…",
+        choices: ["Your contribution percent", "Raise assumptions", "Retirement age"],
+        correctIndex: 0,
+        explain: "Raises help and time helps, but what you put in is the engine — and it's the lever you fully control.",
+        sectionRef: { chapter: 6, anchor: "sec-levers" },
+      },
+      {
+        prompt: `At ${contributionPercent}% with your match, roughly how much lands in your account each month?`,
+        choices: [distractors[0]!, totalFmt, distractors[1]!],
+        correctIndex: 1,
+        explain: "Yours plus the match, every month — and the paycheck feels less than that, because it leaves pre-tax (Chapter 4).",
+        sectionRef: { chapter: 6, anchor: "sec-levers" },
+      },
+      {
+        prompt: "The ritual's first real-world step?",
+        choices: [
+          "Pick the target-date fund",
+          "Log in to your 401k provider",
+          "Open a separate brokerage account",
+        ],
+        correctIndex: 1,
+        explain: "Everything starts at the provider login — the enrollment email HR sent has the link.",
+        sectionRef: { chapter: 6, anchor: "sec-checklist" },
+      },
+    ],
+  };
+}
+
 export const chapter7 = {
   id: "lever-room",
   title: "Lever Room & Action Checklist",
@@ -124,7 +173,7 @@ export const chapter7 = {
       <div class="chapter__genie">${genieSVG("celebrate")}</div>
       <p class="chapter__kicker">Chapter 7</p>
       <h2 class="chapter__title">Lever Room</h2>
-      <div class="speech"><p>Every lever in here is yours. Pull.</p></div>
+      <div class="speech" id="sec-levers"><p>Every lever in here is yours. Pull.</p></div>
       <div class="lever">
         <label>Contribution <strong data-lv="contrib"></strong>
           <input type="range" min="0" max="20" step="1" value="${levers.contributionPercent}" data-lever="contributionPercent" /></label>
@@ -143,14 +192,15 @@ export const chapter7 = {
           : "your raises too"
       }. Everything you've got working for you, all at once.</p>
       <figure class="curve" data-chart></figure>
-      <h2>The Action Checklist</h2>
+      <h2 id="sec-checklist">The Action Checklist</h2>
       <div class="speech"><p>Playtime's over — here's the whole ritual. Twenty minutes, one lifetime of difference.</p></div>
       <ul class="checklist" data-checklist></ul>
       <label class="doneby">Done by
         <input type="date" data-doneby />
       </label>
+      <div data-quiz-slot></div>
       <div class="speech" data-nudge hidden>
-        <p>The magic needs two things from you: the enroll box checked and a done-by date. That's the whole spell — and something good happens when you cast it.</p>
+        <p>The magic needs three things from you: the enroll box checked, a done-by date, and my three questions above answered. That's the whole spell — and something good happens when you cast it.</p>
       </div>
       <div class="finale" data-finale hidden>
         <div class="chapter__genie">${genieSVG("celebrate")}</div>
@@ -211,14 +261,30 @@ export const chapter7 = {
       drawChecklist(); // enroll-step label tracks the contribution slider
     };
 
+    // The Quiz completes the Chapter (WHI-97): here that means the finale
+    // waits for it, alongside the enroll box and the done-by date.
+    const quizSpec = quizCh7(profile, levers.contributionPercent);
+    let quizDone = isDone(
+      loadQuizState(quizSpec.id, quizSpec.questions.length),
+      quizSpec.questions,
+    );
+
     const finale = (fire: boolean): void => {
       const el = q("[data-finale]");
       const was = el.hidden;
-      const ready = finaleReady(checklist);
+      const ready = finaleReady(checklist) && quizDone;
       el.hidden = !ready;
       q("[data-nudge]").hidden = ready;
       if (fire && was && !el.hidden) confetti(root);
     };
+
+    renderQuiz(q("[data-quiz-slot]"), quizSpec, {
+      onChange: (done) => {
+        quizDone = done;
+        finale(true);
+      },
+      onSectionLink: (ref) => document.getElementById(ref.anchor)?.scrollIntoView({ block: "start" }),
+    });
 
     for (const slider of root.querySelectorAll<HTMLInputElement>("[data-lever]")) {
       slider.addEventListener("input", () => {

@@ -83,15 +83,25 @@ test("full journey: intake → seven chapters → celebration → resume", async
   // — Chapter 5: Roth vs Traditional —
   await expect(page.getByRole("heading", { name: "Roth vs Traditional" })).toBeVisible();
   await page.getByRole("button", { name: /does my plan have Roth/ }).click();
+  await passQuiz(page, [
+    "When the tax collector says hello",
+    "Roth — today's tax rate is likely the lowest you'll ever pay",
+    "Pre-tax either way — this choice should never delay enrolling",
+  ]);
   await page.getByRole("button", { name: "Complete chapter" }).click();
 
   // — Chapter 6: Where Money Lives —
   await expect(page.getByRole("heading", { name: "Where Money Lives" })).toBeVisible();
-  await expect(page.getByText("$7,800 – $15,600")).toBeVisible(); // 3–6× monthly spend
+  await expect(page.getByText("$7,800 – $15,600").first()).toBeVisible(); // 3–6× monthly spend
   // The 401k menu spectrum and the volatility expectation (WHI-90).
   await expect(page.locator("[data-spectrum] .spectrum__item")).toHaveCount(3);
   await expect(page.getByText("grows the most, swings the most")).toBeVisible();
   await expect(page.getByText("it's the price of the magic")).toBeVisible();
+  await passQuiz(page, [
+    "$7,800 – $15,600",
+    "Inflation eats it — it melts in real purchasing power",
+    "Nothing — the drop is expected, and selling on the way down is the only losing move",
+  ]);
   await page.getByRole("button", { name: "Complete chapter" }).click();
 
   // — Chapter 7: Lever Room & Action Checklist —
@@ -112,6 +122,13 @@ test("full journey: intake → seven chapters → celebration → resume", async
 
   // Vesting is explained where it first appears — no cold jargon (WHI-86).
   await expect(page.getByText("Vesting is just how long you stay")).toBeVisible();
+
+  // The Chapter 7 quiz is the third finale condition (WHI-97).
+  await passQuiz(page, [
+    "Your contribution percent",
+    "$520",
+    "Log in to your 401k provider",
+  ]);
 
   // Done-by date is the finale trigger: letter from 65-year-old Allie.
   const letter = page.getByText("— Allie, 2059");

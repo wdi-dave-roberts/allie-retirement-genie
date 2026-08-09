@@ -9,6 +9,7 @@ import { lineChart } from "../lib/chart";
 import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
 import { futureValueLumpSum } from "../lib/projection";
+import type { QuizSpec } from "../lib/quiz";
 
 /**
  * Idle-cash real return: 0.4% nominal checking yield against a 2.5% long-run
@@ -58,9 +59,59 @@ function formatExact(value: number): string {
   return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
+/** Range shown in the chapter and reused verbatim as a quiz choice. */
+export function formatRange(low: number, high: number): string {
+  return `${formatExact(low)} – ${formatExact(high)}`;
+}
+
+/** Chapter 6 Quiz (WHI-97) — her emergency target, the rot, and the drop (WHI-90). */
+export function quizCh6(profile: Profile): QuizSpec {
+  const [low, high] = emergencyTarget(profile);
+  const spend = profile.monthlySpend;
+  return {
+    id: "ch6",
+    questions: [
+      {
+        prompt: "Before any market magic — how big is your emergency bucket?",
+        choices: [
+          formatRange(low, high), // 3-6× her real monthly spend
+          formatRange(spend, spend * 2),
+          formatRange(spend * 9, spend * 12),
+        ],
+        correctIndex: 0,
+        explain: "Three to six months of your real spending, parked where you never touch it.",
+        sectionRef: { chapter: 5, anchor: "sec-emergency" },
+      },
+      {
+        prompt: 'Why isn\'t $10,000 "safe" sitting in a 0.4% checking account?',
+        choices: [
+          "Banks charge hidden monthly fees on balances that size",
+          "Inflation eats it — it melts in real purchasing power",
+          "Deposit insurance stops at $5,000",
+        ],
+        correctIndex: 1,
+        explain: "The number on the statement holds still while what it buys shrinks every year.",
+        sectionRef: { chapter: 5, anchor: "sec-rot" },
+      },
+      {
+        prompt: "Some year, your 401k balance will drop 20% or more. The move?",
+        choices: [
+          "Sell before it gets worse",
+          "Shift everything into the money market row",
+          "Nothing — the drop is expected, and selling on the way down is the only losing move",
+        ],
+        correctIndex: 2,
+        explain: "The drop is already baked into every number I've shown you — it's the price of the magic.",
+        sectionRef: { chapter: 5, anchor: "sec-drop" },
+      },
+    ],
+  };
+}
+
 export const chapter6 = {
   id: "where-money-lives",
   title: "Where Money Lives",
+  quiz: (): QuizSpec => quizCh6(loadProfile()),
   render(root: HTMLElement): void {
     const profile = loadProfile();
     if (profile.monthlySpend <= 0) {
@@ -80,12 +131,12 @@ export const chapter6 = {
       <div class="chapter__genie">${genieSVG("point")}</div>
       <p class="chapter__kicker">Chapter 6</p>
       <h2 class="chapter__title">Where Money Lives</h2>
-      <div class="speech"><p>An account is a <em>bucket</em>, not an investment. Before any magic: an emergency fund. Three to six months of your real spending, parked in a high-yield savings account you never touch — they live at online banks, pay roughly 10x the big-bank rate, and take about ten minutes to open.</p></div>
+      <div class="speech" id="sec-emergency"><p>An account is a <em>bucket</em>, not an investment. Before any magic: an emergency fund. Three to six months of your real spending, parked in a high-yield savings account you never touch — they live at online banks, pay roughly 10x the big-bank rate, and take about ten minutes to open.</p></div>
       <div class="reveal reveal--instant">
         <p class="reveal__number">${formatExact(low)} – ${formatExact(high)}</p>
         <p>Your bucket. Boring on purpose. This is what lets you take every other risk in this app.</p>
       </div>
-      <div class="speech"><p>Now the rot. $10,000 "safe" in a 0.4% checking account isn't safe — inflation eats it alive. Same $10,000, invested at 7% real:</p></div>
+      <div class="speech" id="sec-rot"><p>Now the rot. $10,000 "safe" in a 0.4% checking account isn't safe — inflation eats it alive. Same $10,000, invested at 7% real:</p></div>
       <figure class="curve">
         ${lineChart({
           series: [
@@ -120,7 +171,7 @@ export const chapter6 = {
       </ul>
       <p class="dim spectrum__axis">less risk, less upside&nbsp;&nbsp;→&nbsp;&nbsp;more risk, more upside</p>
       <div class="speech"><p>Inside the 401k, skip the stock-picking cosplay. Nobody beats the market reliably — so own the <em>whole</em> market for fees around 0.03%. Easiest version: your plan's <strong>target-date fund</strong> — one fund, dated near 2059, that starts aggressive and calms down as you age. It is a genuinely fine default, and picking it takes eleven seconds.</p></div>
-      <div class="speech"><p>Why does it start stock-heavy? Because at 32 you have 33 years of runway — swings are survivable, and missing the growth isn't. Which brings me to the fine print I actually want you to remember: some year, your balance <strong>will</strong> drop 20% or more. Normal. Expected. Already baked into every number I've shown you. The only losing move is selling on the way down. A drop isn't the magic breaking — it's the price of the magic.</p></div>
+      <div class="speech" id="sec-drop"><p>Why does it start stock-heavy? Because at 32 you have 33 years of runway — swings are survivable, and missing the growth isn't. Which brings me to the fine print I actually want you to remember: some year, your balance <strong>will</strong> drop 20% or more. Normal. Expected. Already baked into every number I've shown you. The only losing move is selling on the way down. A drop isn't the magic breaking — it's the price of the magic.</p></div>
     `;
   },
 };

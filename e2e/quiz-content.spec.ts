@@ -40,6 +40,20 @@ test("ch2 quiz: her cost-of-waiting figure is a choice, passing unlocks the chap
   await expect(page.getByRole("heading", { name: "Free Money" })).toBeVisible();
 });
 
+test("ch6 quiz: her emergency-fund range appears as a choice", async ({ page }) => {
+  await page.goto("./");
+  await page.evaluate((profile) => {
+    localStorage.setItem("genie.profile.v1", JSON.stringify(profile));
+    localStorage.setItem("genie.progress.v1", "5");
+  }, PROFILE);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Where Money Lives" })).toBeVisible();
+
+  // 3-6× her $2,600 monthly spend, exactly as the chapter prints it.
+  await expect(page.getByRole("radio", { name: "$7,800 – $15,600", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Complete chapter" })).toBeDisabled();
+});
+
 test("section link: jumps to the teaching beat and returns with quiz state intact", async ({ page }) => {
   await page.goto("./");
   await page.evaluate((profile) => {
