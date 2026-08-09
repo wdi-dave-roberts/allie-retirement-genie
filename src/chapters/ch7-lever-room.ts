@@ -81,6 +81,14 @@ export function clearChecklist(): void {
   localStorage.removeItem(CHECKLIST_KEY);
 }
 
+/**
+ * The finale is earned, not free: a done-by date plus the enroll box (the
+ * wish itself). The other steps can trail — enrolling is the commitment.
+ */
+export function finaleReady(c: Pick<Checklist, "doneBy" | "enroll">): boolean {
+  return Boolean(c.doneBy) && c.enroll;
+}
+
 function defaultDoneBy(): string {
   const d = new Date();
   d.setDate(d.getDate() + 7);
@@ -136,6 +144,9 @@ export const chapter7 = {
       <label class="doneby">Done by
         <input type="date" data-doneby />
       </label>
+      <div class="speech" data-nudge hidden>
+        <p>The magic needs two things from you: the enroll box checked and a done-by date. That's the whole spell — and something good happens when you cast it.</p>
+      </div>
       <div class="finale" data-finale hidden>
         <div class="chapter__genie">${genieSVG("celebrate")}</div>
         <div class="speech"><p data-note></p></div>
@@ -174,6 +185,7 @@ export const chapter7 = {
           (checklist[box.dataset.check as keyof Checklist] as boolean) = box.checked;
           saveChecklist(checklist);
           drawChecklist();
+          finale(true); // box-then-date order counts too
         });
       }
     };
@@ -197,7 +209,9 @@ export const chapter7 = {
     const finale = (fire: boolean): void => {
       const el = q("[data-finale]");
       const was = el.hidden;
-      el.hidden = !checklist.doneBy;
+      const ready = finaleReady(checklist);
+      el.hidden = !ready;
+      q("[data-nudge]").hidden = ready;
       if (fire && was && !el.hidden) confetti(root);
     };
 
