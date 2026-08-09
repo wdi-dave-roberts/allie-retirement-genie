@@ -13,6 +13,8 @@ import {
   employerMatchMonthly,
   futureValueOfStream,
 } from "../lib/projection";
+import type { QuizSpec } from "../lib/quiz";
+import { uniqueDistractors } from "../quiz/choices";
 
 export const START_AGE = 32;
 export const LATE_START_AGE = 42;
@@ -53,9 +55,56 @@ export function curveData(profile: Profile): CurveData {
   return { monthly, now, later, gap: now - later, nowPoints, laterPoints };
 }
 
+/** Chapter 2 Quiz (WHI-96) — the cost-of-waiting figure is hers. */
+export function quizCh2(profile: Profile): QuizSpec {
+  const data = curveData(profile);
+  const gap = formatMoney(data.gap);
+  const distractors = uniqueDistractors(gap, [
+    formatMoney(data.now), // confusing the cost with the whole balance
+    formatMoney(data.monthly * 12 * 10), // "waiting only costs the skipped deposits"
+    formatMoney(data.gap / 2),
+    formatMoney(data.gap * 2),
+  ]);
+  return {
+    id: "ch2",
+    questions: [
+      {
+        prompt: "What makes the curve bend upward, faster every year?",
+        choices: [
+          "Annual raises kicking in",
+          "Growth earning growth on top of itself",
+          "Banks paying loyalty bonuses",
+        ],
+        correctIndex: 1,
+        explain: "Compounding — each year's growth starts earning growth of its own.",
+        sectionRef: { chapter: 1, anchor: "sec-growth" },
+      },
+      {
+        prompt: "What does waiting ten years to start cost you, in today's dollars?",
+        choices: [...distractors, gap],
+        correctIndex: 2,
+        explain: "Not just the skipped deposits — all the growth those deposits never got to earn.",
+        sectionRef: { chapter: 1, anchor: "sec-cost-of-waiting" },
+      },
+      {
+        prompt: 'Everything I show you is in "Real Dollars." Meaning?',
+        choices: [
+          "What the money buys in today's (2026) terms — inflation already handled",
+          "The literal number that will print on your future statement",
+          "Dollars measured before any taxes",
+        ],
+        correctIndex: 0,
+        explain: "I pre-shrink the future for inflation, so future you and present you talk apples to apples.",
+        sectionRef: { chapter: 1, anchor: "sec-real-dollars" },
+      },
+    ],
+  };
+}
+
 export const chapter2 = {
   id: "the-curve",
   title: "The Curve",
+  quiz: (): QuizSpec => quizCh2(loadProfile()),
   render(root: HTMLElement): void {
     const profile = loadProfile();
     if (profile.salary <= 0) {
@@ -74,7 +123,7 @@ export const chapter2 = {
       <p class="chapter__kicker">Chapter 2</p>
       <h2 class="chapter__title">The Curve</h2>
       <div class="speech"><p>Quick setup first: say you put 6% of each paycheck into your 401k, and your employer chips in the same on top. That second part sounds made up — it's real, and Chapter 3 is entirely about it.</p></div>
-      <div class="speech"><p>Now watch that money grow — starting today vs starting at 42. Growth earns growth. That's the whole trick.</p></div>
+      <div class="speech" id="sec-growth"><p>Now watch that money grow — starting today vs starting at 42. Growth earns growth. That's the whole trick.</p></div>
       <figure class="curve">
         ${lineChart({
           series: [
@@ -88,11 +137,11 @@ export const chapter2 = {
           <span class="curve__key curve__key--later">start at ${LATE_START_AGE} → ${formatMoney(data.later)}</span>
         </figcaption>
       </figure>
-      <div class="reveal">
+      <div class="reveal" id="sec-cost-of-waiting">
         <p class="reveal__number" data-reveal>${formatMoney(data.gap)}</p>
         <p>That's what waiting ten years costs you — in today's dollars. Not a fee. Just growth that never got the chance to grow.</p>
       </div>
-      <p class="dim">Real Dollars: inflation is already accounted for, so this is what it buys in 2026 terms.</p>
+      <p class="dim" id="sec-real-dollars">Real Dollars: inflation is already accounted for, so this is what it buys in 2026 terms.</p>
     `;
   },
 };

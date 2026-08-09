@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 /**
  * The app's regression test: Allie's complete journey, intake through
@@ -6,6 +6,15 @@ import { expect, test } from "@playwright/test";
  * 6% match). Reveal amounts are asserted exactly — if the projection engine
  * or tax constants drift, this fails on the number that changed.
  */
+
+/** Answer a chapter Quiz with the right answers and pass on the first Try (WHI-96). */
+async function passQuiz(page: Page, answers: string[]): Promise<void> {
+  for (const answer of answers) {
+    await page.getByRole("radio", { name: answer, exact: true }).check();
+  }
+  await page.locator("[data-quiz-submit]").click();
+  await expect(page.getByText("Nailed it")).toBeVisible();
+}
 test("full journey: intake → seven chapters → celebration → resume", async ({ page }) => {
   await page.goto("./");
 
@@ -20,8 +29,14 @@ test("full journey: intake → seven chapters → celebration → resume", async
     await page.getByRole("button", { name: "That's my number" }).click();
   }
 
-  // Privacy promise, then the wish.
+  // Privacy promise, then the Chapter 1 quiz gates the wish (WHI-96).
   await expect(page.getByText("your numbers stay on this phone")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Show me my future" })).toBeHidden();
+  await passQuiz(page, [
+    "On this phone — and nowhere else",
+    "Drive every projection in the chapters ahead",
+    "Your monthly spending",
+  ]);
   await page.getByRole("button", { name: "Show me my future" }).click();
 
   // — Chapter 2: The Curve —
@@ -29,7 +44,14 @@ test("full journey: intake → seven chapters → celebration → resume", async
   // Both 6%s are introduced before the chart uses them (WHI-89).
   await expect(page.getByText("Quick setup first")).toBeVisible();
   await expect(page.getByText("start now → $803K")).toBeVisible();
-  await expect(page.getByText("$448K", { exact: true })).toBeVisible();
+  await expect(page.getByText("$448K", { exact: true }).first()).toBeVisible();
+  // The quiz completes the chapter: forward stays off until it's done.
+  await expect(page.getByRole("button", { name: "Complete chapter" })).toBeDisabled();
+  await passQuiz(page, [
+    "Growth earning growth on top of itself",
+    "$448K",
+    "What the money buys in today's (2026) terms — inflation already handled",
+  ]);
   await page.getByRole("button", { name: "Complete chapter" }).click();
 
   // — Chapter 3: Free Money —
@@ -38,6 +60,11 @@ test("full journey: intake → seven chapters → celebration → resume", async
   await expect(page.getByText("$401K", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "I'm in" }).click();
   await expect(page.getByRole("button", { name: /tap to take it back/ })).toBeVisible();
+  await passQuiz(page, [
+    "$3,120",
+    "Declining a raise on purpose",
+    "Doubles instantly — 100% return before any growth",
+  ]);
   await page.getByRole("button", { name: "Complete chapter" }).click();
 
   // — Chapter 4: Paycheck & the Bracket Myth —
@@ -46,6 +73,11 @@ test("full journey: intake → seven chapters → celebration → resume", async
   await expect(page.getByText("$229 a month")).toBeVisible(); // pre-tax trick
   // "Effective" is defined right at the readout (WHI-92).
   await expect(page.getByText("averaged across all your buckets")).toBeVisible();
+  await passQuiz(page, [
+    "Rises — only dollars inside the top bucket pay the higher rate",
+    "Lower — it's the average across all your buckets",
+    "$229",
+  ]);
   await page.getByRole("button", { name: "Complete chapter" }).click();
 
   // — Chapter 5: Roth vs Traditional —

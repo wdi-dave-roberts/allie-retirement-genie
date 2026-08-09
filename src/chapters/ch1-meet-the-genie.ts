@@ -7,6 +7,9 @@
 
 import { genieSVG } from "../genie/genie";
 import { loadProfile, saveProfile, type Profile } from "../lib/profile";
+import { loadCurrent } from "../lib/progress";
+import { isDone, loadQuizState, type QuizSpec } from "../lib/quiz";
+import { renderQuiz } from "../quiz/quiz-ui";
 import type { Chapter, ChapterContext } from "./index";
 
 interface Question {
@@ -106,6 +109,64 @@ function isProfileComplete(p: Profile): boolean {
   return p.salary > 0 && p.monthlySpend > 0;
 }
 
+/** Chapter 1 Quiz (WHI-96) — privacy and what the four numbers drive. Static: it's about the rules, not her figures. */
+export function quizCh1(): QuizSpec {
+  const privacy = { chapter: 0, anchor: "sec-privacy" };
+  return {
+    id: "ch1",
+    questions: [
+      {
+        prompt: "Where do your four numbers live?",
+        choices: ["On this phone — and nowhere else", "In the Genie's cloud", "With your employer's HR system"],
+        correctIndex: 0,
+        explain: "No account, no cloud, nobody else — not even me, and I live here.",
+        sectionRef: privacy,
+      },
+      {
+        prompt: "What do those four numbers do?",
+        choices: [
+          "Qualify you for a credit card",
+          "Drive every projection in the chapters ahead",
+          "Get reported to the IRS",
+        ],
+        correctIndex: 1,
+        explain: "Salary, spend, savings, match — every chart ahead is built from them.",
+        sectionRef: { chapter: 0, anchor: "sec-four-numbers" },
+      },
+      {
+        prompt: "Which of these do I actually know about you?",
+        choices: ["Your name", "Your Social Security number", "Your monthly spending"],
+        correctIndex: 2,
+        explain: "Four numbers, zero identity — I can see your future and still couldn't pick you out of a lineup.",
+        sectionRef: privacy,
+      },
+    ],
+  };
+}
+
+/**
+ * Mount the Chapter 1 Quiz with a gated finish button. Used by both the
+ * intake's last step and the edit screen (a Section Link detour or reload
+ * mid-quiz re-renders Chapter 1 as the edit screen, which must still offer
+ * the way forward while the chapter is current).
+ */
+function mountQuiz(root: HTMLElement, ctx: ChapterContext): void {
+  const spec = quizCh1();
+  const finish = root.querySelector<HTMLButtonElement>("[data-finish]");
+  const sync = (done: boolean): void => {
+    if (finish) finish.hidden = !done;
+  };
+  sync(isDone(loadQuizState(spec.id, spec.questions.length), spec.questions));
+  renderQuiz(root.querySelector<HTMLElement>("[data-quiz-slot]")!, spec, {
+    onChange: sync,
+    onSectionLink: (ref) => document.getElementById(ref.anchor)?.scrollIntoView({ block: "start" }),
+  });
+  finish?.addEventListener("click", () => ctx.complete());
+}
+
+const FOUR_NUMBERS_RECAP =
+  "Those four numbers — salary, spend, savings, match — power every chart ahead.";
+
 export function fieldHTML(q: Question, value: number, autofocus: boolean, verbatim = false): string {
   // Intake hides zero (empty = unanswered); edit mode shows stored values as-is.
   const shown = verbatim || value > 0 || q.key === "matchPercent" ? String(value) : "";
@@ -178,29 +239,33 @@ function renderIntake(root: HTMLElement, ctx: ChapterContext): void {
       return;
     }
 
-    // Privacy + finish
+    // Privacy + quiz + finish. Save before the quiz: a Section Link detour
+    // re-renders Chapter 1, and saved numbers keep the intake from restarting.
+    saveProfile(draft);
     root.innerHTML = `
       <div class="chapter__genie">${genieSVG("idle")}</div>
       <p class="chapter__kicker">One more thing</p>
-      <div class="speech"><p>${PRIVACY}</p></div>
-      <button class="btn btn--primary" data-finish>Show me my future</button>
+      <div class="speech" id="sec-privacy"><p>${PRIVACY}</p></div>
+      <p class="dim" id="sec-four-numbers">${FOUR_NUMBERS_RECAP}</p>
+      <div data-quiz-slot></div>
+      <button class="btn btn--primary" data-finish hidden>Show me my future</button>
     `;
-    root.querySelector("[data-finish]")!.addEventListener("click", () => {
-      saveProfile(draft);
-      ctx.complete();
-    });
+    mountQuiz(root, ctx);
   };
 
   show();
 }
 
-function renderEdit(root: HTMLElement): void {
+function renderEdit(root: HTMLElement, ctx: ChapterContext): void {
   const profile = loadProfile();
+  // Reload or Section Link detour mid-quiz lands here while the chapter is
+  // still current — keep offering the quiz-gated way forward.
+  const stillCurrent = loadCurrent() === 0;
   root.innerHTML = `
     <div class="chapter__genie">${genieSVG("idle")}</div>
     <p class="chapter__kicker">Chapter 1</p>
     <h2 class="chapter__title">Your numbers</h2>
-    <div class="speech"><p>Life changes, numbers change. Edit away — every chapter ahead updates instantly.</p></div>
+    <div class="speech" id="sec-four-numbers"><p>Life changes, numbers change. Edit away — every chapter ahead updates instantly. ${FOUR_NUMBERS_RECAP}</p></div>
     <form data-edit>
       ${QUESTIONS.map(
         (q) => `
@@ -212,7 +277,11 @@ function renderEdit(root: HTMLElement): void {
       <button class="btn btn--primary" type="submit">Update my future</button>
       <p class="dim" data-saved hidden>Done. The future noticed.</p>
     </form>
+    <p class="dim" id="sec-privacy">House rule, always: your numbers stay on this phone — no account, no cloud, nobody else.</p>
+    <div data-quiz-slot></div>
+    ${stillCurrent ? `<button class="btn btn--primary" data-finish hidden>Show me my future</button>` : ""}
   `;
+  mountQuiz(root, ctx);
   const form = root.querySelector<HTMLFormElement>("[data-edit]")!;
   {
     const inputs = [...form.querySelectorAll<HTMLInputElement>("input")];
@@ -251,7 +320,7 @@ export const chapter1: Chapter = {
   title: "Meet the Genie",
   selfPaced: true,
   render(root, ctx) {
-    if (isProfileComplete(loadProfile())) renderEdit(root);
+    if (isProfileComplete(loadProfile())) renderEdit(root, ctx);
     else renderIntake(root, ctx);
   },
 };

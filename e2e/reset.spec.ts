@@ -10,6 +10,15 @@ test("reset: cancel keeps state, confirm returns to first open", async ({ page }
     await page.locator(".chapter input").fill(answer);
     await page.getByRole("button", { name: "That's my number" }).click();
   }
+  // The Chapter 1 quiz gates the wish (WHI-96).
+  for (const answer of [
+    "On this phone — and nowhere else",
+    "Drive every projection in the chapters ahead",
+    "Your monthly spending",
+  ]) {
+    await page.getByRole("radio", { name: answer }).check();
+  }
+  await page.locator("[data-quiz-submit]").click();
   await page.getByRole("button", { name: "Show me my future" }).click();
   await expect(page.getByRole("heading", { name: "The Curve" })).toBeVisible();
 
