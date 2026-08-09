@@ -73,7 +73,8 @@ export const chapter2 = {
       <div class="chapter__genie">${genieSVG("point")}</div>
       <p class="chapter__kicker">Chapter 2</p>
       <h2 class="chapter__title">The Curve</h2>
-      <div class="speech"><p>Here's your money growing at 6% in, 6% matched — starting today vs starting at 42. Growth earns growth. That's the whole trick.</p></div>
+      <div class="speech"><p>Quick setup first: say you put 6% of each paycheck into your 401k, and your employer chips in the same on top. That second part sounds made up — it's real, and Chapter 3 is entirely about it.</p></div>
+      <div class="speech"><p>Now watch that money grow — starting today vs starting at 42. Growth earns growth. That's the whole trick.</p></div>
       <figure class="curve">
         ${lineChart({
           series: [
