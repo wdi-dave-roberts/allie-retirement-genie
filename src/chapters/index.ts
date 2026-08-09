@@ -8,6 +8,7 @@ import { genieSVG, type GeniePose } from "../genie/genie";
 import { chapter1 } from "./ch1-meet-the-genie";
 import { chapter2 } from "./ch2-the-curve";
 import { chapter3 } from "./ch3-free-money";
+import { chapter4 } from "./ch4-paycheck";
 import { chapter5 } from "./ch5-roth";
 import { chapter7 } from "./ch7-lever-room";
 
@@ -40,16 +41,7 @@ export const chapters: Chapter[] = [
   chapter1,
   chapter2,
   chapter3,
-  {
-    id: "paycheck-bracket-myth",
-    title: "Your Paycheck & the Bracket Myth",
-    render: placeholder(
-      "Chapter 4",
-      "Your Paycheck & the Bracket Myth",
-      "A raise never lowers your take-home. Whoever told you that owes you a coffee.",
-      "idle",
-    ),
-  },
+  chapter4,
   chapter5,
   {
     id: "where-money-lives",
