@@ -5,15 +5,23 @@
  */
 
 import { genieSVG, type GeniePose } from "../genie/genie";
+import { chapter1 } from "./ch1-meet-the-genie";
 import { chapter2 } from "./ch2-the-curve";
 import { chapter3 } from "./ch3-free-money";
 import { chapter5 } from "./ch5-roth";
 import { chapter7 } from "./ch7-lever-room";
 
+export interface ChapterContext {
+  /** Mark this chapter complete and advance (no-op unless it is current). */
+  complete(): void;
+}
+
 export interface Chapter {
   id: string;
   title: string;
-  render(root: HTMLElement): void;
+  /** Self-paced chapters drive their own completion; the shell hides its button. */
+  selfPaced?: boolean;
+  render(root: HTMLElement, ctx: ChapterContext): void;
 }
 
 function placeholder(kicker: string, title: string, line: string, pose: GeniePose): (root: HTMLElement) => void {
@@ -29,16 +37,7 @@ function placeholder(kicker: string, title: string, line: string, pose: GeniePos
 }
 
 export const chapters: Chapter[] = [
-  {
-    id: "meet-the-genie",
-    title: "Meet the Genie",
-    render: placeholder(
-      "Chapter 1",
-      "Meet the Genie",
-      "Hi. I live in a lamp and I know what you'll be worth in 2059. Want to peek?",
-      "celebrate",
-    ),
-  },
+  chapter1,
   chapter2,
   chapter3,
   {
