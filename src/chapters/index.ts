@@ -5,6 +5,7 @@
  */
 
 import { genieSVG, type GeniePose } from "../genie/genie";
+import { chapter2 } from "./ch2-the-curve";
 
 export interface Chapter {
   id: string;
@@ -35,16 +36,7 @@ export const chapters: Chapter[] = [
       "celebrate",
     ),
   },
-  {
-    id: "the-curve",
-    title: "The Curve",
-    render: placeholder(
-      "Chapter 2",
-      "The Curve",
-      "Money doesn't grow in a line. It grows like gossip — slow at first, then everywhere.",
-      "point",
-    ),
-  },
+  chapter2,
   {
     id: "free-money",
     title: "Free Money",
