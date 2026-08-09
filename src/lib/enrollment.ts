@@ -29,3 +29,8 @@ export function isRothCheckFlagged(): boolean {
 export function setRothCheckFlagged(value: boolean): void {
   localStorage.setItem(ROTH_KEY, value ? "1" : "0");
 }
+
+export function clearEnrollment(): void {
+  localStorage.removeItem(KEY);
+  localStorage.removeItem(ROTH_KEY);
+}

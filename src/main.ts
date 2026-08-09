@@ -6,6 +6,7 @@ import {
   loadCurrent,
   statusOf,
 } from "./lib/progress";
+import { clearAllState } from "./lib/reset";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -38,6 +39,16 @@ function render(): void {
       </button>`
       }
     </nav>
+    <footer class="reset">
+      <button class="reset__link" data-reset>Start over</button>
+    </footer>
+    <dialog class="reset__dialog" data-reset-dialog>
+      <p>Rub the lamp again? Everything starts over — your numbers, your progress, all of it.</p>
+      <form method="dialog" class="reset__actions">
+        <button value="cancel" class="btn btn--ghost" autofocus>Keep my future</button>
+        <button value="confirm" class="btn btn--danger">Start over</button>
+      </form>
+    </dialog>
   `;
 
   chapter.render(app.querySelector<HTMLElement>(".chapter")!, {
@@ -65,6 +76,17 @@ function render(): void {
       view += 1; // re-reading a complete chapter; forward never passes current
     }
     render();
+  });
+
+  const dialog = app.querySelector<HTMLDialogElement>("[data-reset-dialog]")!;
+  app.querySelector<HTMLButtonElement>("[data-reset]")!.addEventListener("click", () => {
+    dialog.showModal();
+  });
+  dialog.addEventListener("close", () => {
+    if (dialog.returnValue === "confirm") {
+      clearAllState();
+      location.reload(); // land on Chapter 1 intake with no stale in-memory state
+    }
   });
 }
 

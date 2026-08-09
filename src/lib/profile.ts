@@ -32,3 +32,7 @@ export function loadProfile(): Profile {
 export function saveProfile(profile: Profile): void {
   localStorage.setItem(KEY, JSON.stringify(profile));
 }
+
+export function clearProfile(): void {
+  localStorage.removeItem(KEY);
+}
