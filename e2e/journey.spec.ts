@@ -54,6 +54,10 @@ test("full journey: intake → seven chapters → celebration → resume", async
   // — Chapter 6: Where Money Lives —
   await expect(page.getByRole("heading", { name: "Where Money Lives" })).toBeVisible();
   await expect(page.getByText("$7,800 – $15,600")).toBeVisible(); // 3–6× monthly spend
+  // The 401k menu spectrum and the volatility expectation (WHI-90).
+  await expect(page.locator("[data-spectrum] .spectrum__item")).toHaveCount(3);
+  await expect(page.getByText("grows the most, swings the most")).toBeVisible();
+  await expect(page.getByText("it's the price of the magic")).toBeVisible();
   await page.getByRole("button", { name: "Complete chapter" }).click();
 
   // — Chapter 7: Lever Room & Action Checklist —
