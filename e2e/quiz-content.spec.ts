@@ -35,8 +35,17 @@ test("ch2 quiz: her cost-of-waiting figure is a choice, passing unlocks the chap
   await page.getByRole("radio", { name: "$448K", exact: true }).check();
   await page.locator("[data-quiz-submit]").click();
   await expect(page.getByText("Nailed it")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Complete chapter" })).toBeEnabled();
-  await page.getByRole("button", { name: "Complete chapter" }).click();
+  await expect(page.getByRole("button", { name: "Continue" })).toBeEnabled();
+
+  // The forward button split: gold Review answers opens the hidden key in
+  // place, green Continue moves on.
+  const review = page.getByRole("button", { name: "Review answers" });
+  await expect(review).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Answer Key" })).toBeHidden();
+  await review.click();
+  await expect(page.getByRole("heading", { name: "Answer Key" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByRole("heading", { name: "Free Money" })).toBeVisible();
 });
 

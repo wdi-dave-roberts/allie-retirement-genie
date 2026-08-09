@@ -6,7 +6,7 @@ import {
   loadCurrent,
   statusOf,
 } from "./lib/progress";
-import { isDone, loadQuizState, type SectionRef } from "./lib/quiz";
+import { isDone, loadQuizState, passed, type SectionRef } from "./lib/quiz";
 import { clearAllState } from "./lib/reset";
 import { initGenieNotes } from "./notes/genie-note";
 import { renderNoteDemo } from "./notes/demo";
@@ -26,9 +26,9 @@ function render(): void {
   const chapter = chapters[view]!;
   const quiz = chapter.quiz?.();
   // The Quiz completes the Chapter: forward stays off until pass or Answer Key.
-  const quizDone = quiz
-    ? isDone(loadQuizState(quiz.id, quiz.questions.length), quiz.questions)
-    : true;
+  const quizState = quiz ? loadQuizState(quiz.id, quiz.questions.length) : null;
+  const quizDone = quiz ? isDone(quizState!, quiz.questions) : true;
+  const quizPassed = quiz ? passed(quizState!, quiz.questions) : false;
   // Self-paced chapters (e.g. Chapter 1 intake) drive their own completion.
   const hideForward = chapter.selfPaced === true && view === current;
   app.innerHTML = `
@@ -46,9 +46,14 @@ function render(): void {
       ${
         hideForward
           ? ""
-          : `<button class="btn btn--primary" data-nav="forward"
+          : `${
+              quiz
+                ? `<button class="btn btn--primary" data-nav="review" aria-expanded="false"
+                    ${quizPassed ? "" : "hidden"}>Review answers</button>`
+                : ""
+            }<button class="btn ${quizPassed ? "btn--continue" : "btn--primary"}" data-nav="forward"
         ${view === current && !quizDone ? "disabled" : ""}>
-        ${view < current ? "Continue" : view === CHAPTER_COUNT - 1 ? "Finish" : "Complete chapter"}
+        ${quizPassed || view < current ? "Continue" : view === CHAPTER_COUNT - 1 ? "Finish" : "Complete chapter"}
       </button>`
       }
     </nav>
@@ -83,12 +88,30 @@ function render(): void {
         // mid-quiz.
         const forward = app.querySelector<HTMLButtonElement>('[data-nav="forward"]');
         if (forward && view === current) forward.disabled = !done;
+        // On a pass the big yellow button splits where her thumb already is:
+        // gold Review answers + green Continue (human UAT — everything
+        // subtler went unnoticed).
+        if (forward && passed(loadQuizState(quiz.id, quiz.questions.length), quiz.questions)) {
+          forward.textContent = "Continue";
+          forward.classList.remove("btn--primary");
+          forward.classList.add("btn--continue");
+          app.querySelector<HTMLElement>('[data-nav="review"]')?.removeAttribute("hidden");
+        }
       },
       onSectionLink: (ref) => {
         gotoSection(ref);
       },
     });
   }
+
+  app.querySelector<HTMLButtonElement>('[data-nav="review"]')?.addEventListener("click", (e) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    const key = app.querySelector<HTMLElement>("[data-answer-key]");
+    if (!key) return;
+    key.hidden = !key.hidden;
+    btn.setAttribute("aria-expanded", String(!key.hidden));
+    if (!key.hidden) key.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 
   app.querySelector<HTMLButtonElement>('[data-nav="back"]')?.addEventListener("click", () => {
     if (view > 0) {

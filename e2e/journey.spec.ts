@@ -67,7 +67,7 @@ test("full journey: intake → seven chapters → celebration → resume", async
     "$448K",
     "What the money buys in today's (2026) terms — inflation already handled",
   ]);
-  await page.getByRole("button", { name: "Complete chapter" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
 
   // — Chapter 3: Free Money —
   await expect(page.getByRole("heading", { name: "Free Money" })).toBeVisible();
@@ -80,7 +80,7 @@ test("full journey: intake → seven chapters → celebration → resume", async
     "Declining a raise on purpose",
     "Doubles instantly — 100% return before any growth",
   ]);
-  await page.getByRole("button", { name: "Complete chapter" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
 
   // — Chapter 4: Paycheck & the Bracket Myth —
   await expect(page.getByRole("heading", { name: "Your Paycheck & the Bracket Myth" })).toBeVisible();
@@ -93,7 +93,7 @@ test("full journey: intake → seven chapters → celebration → resume", async
     "Lower — it's the average across all your buckets",
     "$229",
   ]);
-  await page.getByRole("button", { name: "Complete chapter" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
 
   // — Chapter 5: Roth vs Traditional —
   await expect(page.getByRole("heading", { name: "Roth vs Traditional" })).toBeVisible();
@@ -103,7 +103,7 @@ test("full journey: intake → seven chapters → celebration → resume", async
     "Roth — today's tax rate is likely the lowest you'll ever pay",
     "Pre-tax either way — this choice should never delay enrolling",
   ]);
-  await page.getByRole("button", { name: "Complete chapter" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
 
   // — Chapter 6: Where Money Lives —
   await expect(page.getByRole("heading", { name: "Where Money Lives" })).toBeVisible();
@@ -117,7 +117,7 @@ test("full journey: intake → seven chapters → celebration → resume", async
     "Inflation eats it — it melts in real purchasing power",
     "Nothing — the drop is expected, and selling on the way down is the only losing move",
   ]);
-  await page.getByRole("button", { name: "Complete chapter" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
 
   // — Chapter 7: Lever Room & Action Checklist —
   await expect(page.getByRole("heading", { name: "Lever Room" })).toBeVisible();

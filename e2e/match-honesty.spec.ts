@@ -44,6 +44,6 @@ test("match = 0: no fake raise, honest pivot, chapter still completes", async ({
   }
   await page.locator("[data-quiz-submit]").click();
   await expect(page.getByText("Nailed it")).toBeVisible();
-  await page.getByRole("button", { name: "Complete chapter" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByRole("heading", { name: "Your Paycheck & the Bracket Myth" })).toBeVisible();
 });

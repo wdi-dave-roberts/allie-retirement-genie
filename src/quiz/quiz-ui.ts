@@ -113,10 +113,7 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
         ${
           done
             ? win
-              ? `<div class="quiz__result-row">
-                  <p class="quiz__result">✓ ${copy.win}</p>
-                  <button class="btn btn--ghost quiz__review" data-review-toggle aria-expanded="false">Review answers</button>
-                </div>`
+              ? `<p class="quiz__result">✓ ${copy.win}</p>`
               : ""
             : `<p class="quiz__tries">${copy.lead} Try ${state.tries + 1} of ${MAX_TRIES} — no stakes, the lamp doesn't judge.</p>`
         }
@@ -130,14 +127,6 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
         }
         ${keyHTML}
       </section>`;
-
-    host.querySelector<HTMLButtonElement>("[data-review-toggle]")?.addEventListener("click", (e) => {
-      const btn = e.currentTarget as HTMLButtonElement;
-      const key = host.querySelector<HTMLElement>("[data-answer-key]")!;
-      key.hidden = !key.hidden;
-      btn.setAttribute("aria-expanded", String(!key.hidden));
-      if (!key.hidden) key.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
 
     host.querySelectorAll<HTMLInputElement>("input[type=radio]").forEach((input) => {
       input.addEventListener("change", () => {
@@ -162,15 +151,6 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
         setTimeout(() => {
           fresh.disabled = !allAnswered(state);
         }, 350);
-      }
-      // She tapped submit at the BOTTOM of the quiz; the win row renders at
-      // the TOP, a full quiz above the viewport (human UAT: passed and never
-      // saw the celebration or the Review answers button). Bring it to her.
-      if (passed(state, questions)) {
-        const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-        host
-          .querySelector(".quiz__result-row")
-          ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
       }
       hooks.onChange?.(isDone(state, questions));
     });
