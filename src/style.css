@@ -833,32 +833,24 @@ form .btn {
   text-align: left;
 }
 
-.quiz__key-disclosure summary {
-  cursor: pointer;
-  padding: var(--space-2) 0;
+/* Pass state: win message and the Review answers button share one row, so
+   the key's entry point sits where her eyes land (human UAT: a link below
+   the questions went unnoticed for four chapters). */
+.quiz__result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
-/* First-ever pass: the folded key announces itself once (human UAT). */
-.quiz__key-aside {
-  margin-bottom: 0;
+.quiz__result-row .quiz__result {
+  margin: 0;
 }
 
-.quiz__key-disclosure--fresh summary {
-  animation: key-shimmer 1s ease-in-out 2;
-  border-radius: 4px;
-}
-
-@keyframes key-shimmer {
-  50% {
-    background: var(--lamp-gold-dim);
-    box-shadow: 0 0 12px var(--lamp-gold-dim);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .quiz__key-disclosure--fresh summary {
-    animation: none;
-  }
+.quiz__review {
+  min-height: 40px;
+  padding: var(--space-1) var(--space-3);
 }
 
 /* Floating way back after a Section Link jump */

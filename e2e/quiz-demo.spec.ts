@@ -46,7 +46,7 @@ test("three wrong tries: marks, editable wrongs, locked rights, Answer Key", asy
   // Try 3 — still wrong: the Answer Key appears and the quiz closes down.
   await page.locator("[data-quiz-submit]").click();
   await expect(page.getByRole("heading", { name: "Answer Key" })).toBeVisible();
-  await expect(page.locator("[data-key-disclosure]")).toHaveCount(0); // exhausted path stays open (WHI-107)
+  await expect(page.locator("[data-review-toggle]")).toHaveCount(0); // exhausted path stays open (WHI-107)
   await expect(page.getByText("took me centuries")).toBeVisible();
   await expect(page.locator("[data-quiz-submit]")).toHaveCount(0);
   for (const radio of await page.locator(".quiz input").all()) {
@@ -62,7 +62,7 @@ test("three wrong tries: marks, editable wrongs, locked rights, Answer Key", asy
   await expect(page.getByRole("heading", { name: "Answer Key" })).toBeVisible();
 });
 
-test("clean pass on the first Try: green across, Answer Key folded behind a disclosure", async ({ page }) => {
+test("clean pass on the first Try: green across, Review answers button in the win row", async ({ page }) => {
   await page.goto("./?quiz-demo");
   for (const label of RIGHT) await page.getByRole("radio", { name: label }).check();
   await page.locator("[data-quiz-submit]").click();
@@ -70,13 +70,20 @@ test("clean pass on the first Try: green across, Answer Key folded behind a disc
   await expect(page.getByText("Nailed it")).toBeVisible();
   await expect(page.getByText("✓ right")).toHaveCount(3);
 
-  // On a pass the key is folded away — the win moment stays clean (WHI-107).
-  const disclosure = page.locator("[data-key-disclosure]");
-  await expect(disclosure).toBeVisible();
+  // On a pass the key is hidden — the win moment stays clean (WHI-107) — and
+  // its entry point is a real button in the win row, not a buried link.
+  const toggle = page.locator("[data-review-toggle]");
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(page.getByRole("heading", { name: "Answer Key" })).toBeHidden();
 
-  await disclosure.locator("summary").click();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByRole("heading", { name: "Answer Key" })).toBeVisible();
   await expect(page.getByText("zero judgment")).toBeVisible(); // Genie explanation line
   await expect(page.getByText("took me centuries")).toHaveCount(0); // no consolation on a pass
+
+  // Second tap folds it back.
+  await toggle.click();
+  await expect(page.getByRole("heading", { name: "Answer Key" })).toBeHidden();
 });

@@ -26,17 +26,9 @@ export interface QuizHooks {
   onSectionLink?: (ref: SectionRef) => void;
 }
 
-/**
- * First-ever quiz pass across the app: the folded Answer Key is easy to miss
- * (human UAT — four chapters missed), so that one time it announces itself.
- * The genie.quiz. prefix means reset wipes this along with the quiz states.
- */
-const SEEN_KEY = "genie.quiz.seen-key.v1";
-
 export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks = {}): void {
   const { questions } = spec;
   let state = loadQuizState(spec.id, questions.length);
-  let freshKeyReveal = false;
 
   const copy = {
     title: "Quick quiz",
@@ -87,8 +79,13 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
       })
       .join("");
 
+    // On a pass the key is a courtesy, not remediation — hidden by default so
+    // the win moment stays clean, opened by a first-class button IN the win
+    // row, where her eyes are (human UAT: a link below the questions went
+    // unnoticed for four chapters). Out of Tries, it renders open: there it
+    // IS the teaching (WHI-107).
     const keyBody = `
-        <section class="quiz__key" data-answer-key>
+        <section class="quiz__key" data-answer-key ${win ? "hidden" : ""}>
           <h4>Answer Key</h4>
           ${
             win
@@ -108,22 +105,7 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
             .join("")}
         </section>`;
 
-    // On a pass the key is a courtesy, not remediation — fold it away so the
-    // win moment stays clean. Out of Tries, it stays open: there it IS the
-    // teaching (WHI-107).
-    if (win && localStorage.getItem(SEEN_KEY) === null) {
-      localStorage.setItem(SEEN_KEY, "1");
-      freshKeyReveal = true;
-    }
-    const keyHTML = !done
-      ? ""
-      : win
-        ? `${freshKeyReveal ? `<p class="dim quiz__key-aside" data-key-aside>Your answers keep, in there ↓</p>` : ""}
-          <details class="quiz__key-disclosure ${freshKeyReveal ? "quiz__key-disclosure--fresh" : ""}" data-key-disclosure>
-            <summary class="quiz__link">Review answers</summary>
-            ${keyBody}
-          </details>`
-        : keyBody;
+    const keyHTML = !done ? "" : keyBody;
 
     host.innerHTML = `
       <section class="quiz" aria-label="${copy.ariaLabel}">
@@ -131,7 +113,10 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
         ${
           done
             ? win
-              ? `<p class="quiz__result">✓ ${copy.win}</p>`
+              ? `<div class="quiz__result-row">
+                  <p class="quiz__result">✓ ${copy.win}</p>
+                  <button class="btn btn--ghost quiz__review" data-review-toggle aria-expanded="false">Review answers</button>
+                </div>`
               : ""
             : `<p class="quiz__tries">${copy.lead} Try ${state.tries + 1} of ${MAX_TRIES} — no stakes, the lamp doesn't judge.</p>`
         }
@@ -145,6 +130,14 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
         }
         ${keyHTML}
       </section>`;
+
+    host.querySelector<HTMLButtonElement>("[data-review-toggle]")?.addEventListener("click", (e) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      const key = host.querySelector<HTMLElement>("[data-answer-key]")!;
+      key.hidden = !key.hidden;
+      btn.setAttribute("aria-expanded", String(!key.hidden));
+      if (!key.hidden) key.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
 
     host.querySelectorAll<HTMLInputElement>("input[type=radio]").forEach((input) => {
       input.addEventListener("change", () => {
