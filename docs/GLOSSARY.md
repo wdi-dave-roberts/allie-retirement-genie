@@ -51,3 +51,8 @@ Maintained by `loop-spec`. Edit directly if a definition drifts from reality.
 
 - **Resume** — progress persists in `localStorage`; reopening the app returns
   Allie to her `current` chapter. One-shot doesn't mean one-sitting.
+
+- **Reset** — full wipe of all persisted state (Profile, chapter progress,
+  "I'm in" toggle, Roth flag, Action Checklist) back to first-open: Chapter 1
+  intake. Triggered from a subtle "Start over" footer link present on every
+  Chapter, behind a confirm dialog in Genie voice. There is no partial reset.
