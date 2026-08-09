@@ -768,6 +768,11 @@ form .btn {
   text-align: left;
 }
 
+.quiz__key-disclosure summary {
+  cursor: pointer;
+  padding: var(--space-2) 0;
+}
+
 /* Floating way back after a Section Link jump */
 .quiz-return {
   position: fixed;

@@ -79,9 +79,7 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
       })
       .join("");
 
-    const keyHTML = !done
-      ? ""
-      : `
+    const keyBody = `
         <section class="quiz__key" data-answer-key>
           <h4>Answer Key</h4>
           ${
@@ -101,6 +99,18 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
             )
             .join("")}
         </section>`;
+
+    // On a pass the key is a courtesy, not remediation — fold it away so the
+    // win moment stays clean. Out of Tries, it stays open: there it IS the
+    // teaching (WHI-107).
+    const keyHTML = !done
+      ? ""
+      : win
+        ? `<details class="quiz__key-disclosure" data-key-disclosure>
+            <summary class="quiz__link">Review answers</summary>
+            ${keyBody}
+          </details>`
+        : keyBody;
 
     host.innerHTML = `
       <section class="quiz" aria-label="${copy.ariaLabel}">
