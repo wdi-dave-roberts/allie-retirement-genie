@@ -25,6 +25,10 @@ export function saveCurrent(index: number): void {
   localStorage.setItem(KEY, String(index));
 }
 
+export function clearProgress(): void {
+  localStorage.removeItem(KEY);
+}
+
 export function statusOf(index: number, current: number): ChapterStatus {
   if (index < current) return "complete";
   if (index === current) return "current";

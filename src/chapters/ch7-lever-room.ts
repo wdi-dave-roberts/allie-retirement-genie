@@ -77,6 +77,10 @@ function saveChecklist(c: Checklist): void {
   localStorage.setItem(CHECKLIST_KEY, JSON.stringify(c));
 }
 
+export function clearChecklist(): void {
+  localStorage.removeItem(CHECKLIST_KEY);
+}
+
 function defaultDoneBy(): string {
   const d = new Date();
   d.setDate(d.getDate() + 7);
