@@ -30,6 +30,14 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
   const { questions } = spec;
   let state = loadQuizState(spec.id, questions.length);
 
+  const copy = {
+    title: "Quick quiz",
+    ariaLabel: "Chapter quiz",
+    lead: `${questions.length} questions to wrap the chapter.`,
+    win: "Nailed it — the chapter's yours.",
+    ...spec.copy,
+  };
+
   const mark = (right: boolean): string =>
     right
       ? `<span class="quiz__mark quiz__mark--right">✓ right</span>`
@@ -88,14 +96,14 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
         </section>`;
 
     host.innerHTML = `
-      <section class="quiz" aria-label="Chapter quiz">
-        <h3 class="quiz__title">Quick quiz</h3>
+      <section class="quiz" aria-label="${copy.ariaLabel}">
+        <h3 class="quiz__title">${copy.title}</h3>
         ${
           done
             ? win
-              ? `<p class="quiz__result">✓ Nailed it — the chapter's yours.</p>`
+              ? `<p class="quiz__result">✓ ${copy.win}</p>`
               : ""
-            : `<p class="quiz__tries">${questions.length} questions to wrap the chapter. Try ${state.tries + 1} of ${MAX_TRIES} — no stakes, the lamp doesn't judge.</p>`
+            : `<p class="quiz__tries">${copy.lead} Try ${state.tries + 1} of ${MAX_TRIES} — no stakes, the lamp doesn't judge.</p>`
         }
         ${questionsHTML}
         ${

@@ -3,6 +3,7 @@ import {
   MAX_TRIES,
   allAnswered,
   clearQuizState,
+  correctCount,
   isDone,
   isLocked,
   loadQuizState,
@@ -106,6 +107,20 @@ describe("pass detection", () => {
     for (let i = 0; i < MAX_TRIES; i++) s = submitTry(s, questions);
     expect(passed(s, questions)).toBe(false);
     expect(isDone(s, questions)).toBe(true);
+  });
+});
+
+describe("correctCount", () => {
+  it("counts only submitted right answers", () => {
+    expect(correctCount(newQuizState(3), questions)).toBe(0);
+
+    let s = answerAll(newQuizState(3), [0, 1, 0]); // Q1-2 right, Q3 wrong
+    expect(correctCount(s, questions)).toBe(0); // selections alone don't score
+    s = submitTry(s, questions);
+    expect(correctCount(s, questions)).toBe(2);
+
+    s = submitTry(selectAnswer(s, questions, 2, 2), questions);
+    expect(correctCount(s, questions)).toBe(3);
   });
 });
 

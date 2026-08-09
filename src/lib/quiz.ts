@@ -29,6 +29,8 @@ export interface QuizSpec {
   id: string;
   /** Built at render time so prompts can use the live Profile. */
   questions: QuizQuestion[];
+  /** Voice overrides for non-chapter quizzes (the Final Exam). */
+  copy?: { title?: string; ariaLabel?: string; lead?: string; win?: string };
 }
 
 export interface QuizState {
@@ -85,6 +87,11 @@ export function passed(state: QuizState, questions: QuizQuestion[]): boolean {
 /** Done = passed or out of Tries (the Answer Key shows either way). */
 export function isDone(state: QuizState, questions: QuizQuestion[]): boolean {
   return passed(state, questions) || state.tries >= MAX_TRIES;
+}
+
+/** Right answers as of the last Try — the Final Exam's score. */
+export function correctCount(state: QuizState, questions: QuizQuestion[]): number {
+  return questions.reduce((n, q, i) => n + (state.submitted[i] === q.correctIndex ? 1 : 0), 0);
 }
 
 /* — Persistence — one key per quiz so Reset can wipe them all by prefix. */

@@ -14,10 +14,12 @@ import {
   employerMatchMonthly,
   futureValueOfStream,
 } from "../lib/projection";
-import { isDone, loadQuizState, type QuizSpec } from "../lib/quiz";
+import { correctCount, isDone, loadQuizState, type QuizSpec } from "../lib/quiz";
 import { uniqueDistractors } from "../quiz/choices";
+import { finalExam } from "../quiz/exam";
 import { renderQuiz } from "../quiz/quiz-ui";
 import { confetti, formatExact } from "./ch3-free-money";
+import type { ChapterContext } from "./index";
 
 export const CURRENT_AGE = 32;
 
@@ -151,7 +153,7 @@ export const chapter7 = {
   // button can't advance anywhere (progress clamps at the last chapter), so
   // let the chapter own its ending like Chapter 1 owns its intake.
   selfPaced: true,
-  render(root: HTMLElement): void {
+  render(root: HTMLElement, ctx: ChapterContext): void {
     const profile = loadProfile();
     if (profile.salary <= 0) {
       root.innerHTML = `
@@ -192,15 +194,21 @@ export const chapter7 = {
           : "your raises too"
       }. Everything you've got working for you, all at once.</p>
       <figure class="curve" data-chart></figure>
+      <div data-ch7-quiz></div>
+      <section data-exam hidden>
+        <div class="chapter__genie">${genieSVG("point")}</div>
+        <div class="speech"><p>Seven chapters in the lamp — let's see what stuck. Ten questions, then the checklist and your wish.</p></div>
+        <div data-quiz-slot></div>
+        <div class="speech" data-exam-score hidden><p data-exam-score-line></p></div>
+      </section>
       <h2 id="sec-checklist">The Action Checklist</h2>
       <div class="speech"><p>Playtime's over — here's the whole ritual. Twenty minutes, one lifetime of difference.</p></div>
       <ul class="checklist" data-checklist></ul>
       <label class="doneby">Done by
         <input type="date" data-doneby />
       </label>
-      <div data-quiz-slot></div>
       <div class="speech" data-nudge hidden>
-        <p>The magic needs three things from you: the enroll box checked, a done-by date, and my three questions above answered. That's the whole spell — and something good happens when you cast it.</p>
+        <p>The magic needs my three questions answered, the Final Exam faced, the enroll box checked, and a done-by date. That's the whole spell — and something good happens when you cast it.</p>
       </div>
       <div class="finale" data-finale hidden>
         <div class="chapter__genie">${genieSVG("celebrate")}</div>
@@ -256,7 +264,10 @@ export const chapter7 = {
         series: [{ points: result.points, className: "curve__line curve__line--now" }],
         label: `Projected balance from age ${CURRENT_AGE} to ${levers.retireAge}: ${formatMoney(result.balance)} in Real Dollars`,
       });
-      const note = `Hey. It's you, at ${levers.retireAge}. The ${formatMoney(result.balance)} is real — I'm looking at it. It started the week you set a done-by date and stopped declining raises. Thank you for that. — Allie, ${2026 + levers.retireAge - CURRENT_AGE}`;
+      const score = examDone
+        ? ` P.S. ${correctCount(examState, examSpec.questions)} out of ${examSpec.questions.length} on the exam — I kept the score. The enrolling is what I framed.`
+        : "";
+      const note = `Hey. It's you, at ${levers.retireAge}. The ${formatMoney(result.balance)} is real — I'm looking at it. It started the week you set a done-by date and stopped declining raises. Thank you for that. — Allie, ${2026 + levers.retireAge - CURRENT_AGE}${score}`;
       q("[data-note]").textContent = note;
       drawChecklist(); // enroll-step label tracks the contribution slider
     };
@@ -269,21 +280,56 @@ export const chapter7 = {
       quizSpec.questions,
     );
 
+    // The Final Exam (WHI-98) sits between the Lever Room and the checklist,
+    // unlocked by the Chapter 7 quiz (Ch1-6 are complete just by being here).
+    const examSpec = finalExam(profile);
+    let examState = loadQuizState(examSpec.id, examSpec.questions.length);
+    let examDone = isDone(examState, examSpec.questions);
+
+    const drawExamGate = (): void => {
+      q("[data-exam]").hidden = !quizDone;
+      q("[data-exam-score]").hidden = !examDone;
+      if (examDone) {
+        const right = correctCount(examState, examSpec.questions);
+        q("[data-exam-score-line]").textContent =
+          right === examSpec.questions.length
+            ? `${right} out of ${examSpec.questions.length}. Centuries in this lamp and you still managed to impress me.`
+            : `${right} out of ${examSpec.questions.length} — and the Answer Key just filled in the rest. The part that changes your life is right below.`;
+      }
+    };
+
     const finale = (fire: boolean): void => {
       const el = q("[data-finale]");
       const was = el.hidden;
-      const ready = finaleReady(checklist) && quizDone;
+      const ready = finaleReady(checklist) && quizDone && examDone;
       el.hidden = !ready;
       q("[data-nudge]").hidden = ready;
       if (fire && was && !el.hidden) confetti(root);
     };
 
-    renderQuiz(q("[data-quiz-slot]"), quizSpec, {
+    renderQuiz(q("[data-ch7-quiz]"), quizSpec, {
       onChange: (done) => {
         quizDone = done;
+        drawExamGate();
         finale(true);
       },
       onSectionLink: (ref) => document.getElementById(ref.anchor)?.scrollIntoView({ block: "start" }),
+    });
+
+    renderQuiz(q("[data-quiz-slot]"), examSpec, {
+      onChange: (done) => {
+        examState = loadQuizState(examSpec.id, examSpec.questions.length);
+        examDone = done;
+        drawExamGate();
+        drawProjection(); // the finale note carries the score
+        finale(true);
+      },
+      // Exam questions teach across all seven chapters — jump out with a way
+      // back for the other six, plain scroll for this one.
+      onSectionLink: (ref) =>
+        ref.chapter === 6
+          ? document.getElementById(ref.anchor)?.scrollIntoView({ block: "start" })
+          : ctx.gotoSection?.(ref),
     });
 
     for (const slider of root.querySelectorAll<HTMLInputElement>("[data-lever]")) {
@@ -304,6 +350,7 @@ export const chapter7 = {
     });
 
     drawProjection();
+    drawExamGate();
     finale(false);
   },
 };

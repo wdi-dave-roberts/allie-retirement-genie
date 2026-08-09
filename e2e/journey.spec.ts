@@ -12,9 +12,24 @@ async function passQuiz(page: Page, answers: string[]): Promise<void> {
   for (const answer of answers) {
     await page.getByRole("radio", { name: answer, exact: true }).check();
   }
-  await page.locator("[data-quiz-submit]").click();
+  // .first(): Chapter 7 also holds the (hidden) Final Exam's submit button.
+  await page.locator("[data-quiz-submit]").first().click();
   await expect(page.getByText("Nailed it")).toBeVisible();
 }
+
+/** The Final Exam's 10 right answers for the journey profile (WHI-98). */
+const EXAM_ANSWERS = [
+  "On this phone — and nowhere else",
+  "Growth earning growth on top of itself",
+  "A raise you're declining on purpose",
+  "Never true — only the top-bucket dollars pay the new rate",
+  "When the tax collector says hello",
+  "Nothing — it's expected, and selling on the way down is the only losing move",
+  "You fully control: your contribution percent",
+  "$3,120",
+  "$448K",
+  "$229",
+];
 test("full journey: intake → seven chapters → celebration → resume", async ({ page }) => {
   await page.goto("./");
 
@@ -123,18 +138,41 @@ test("full journey: intake → seven chapters → celebration → resume", async
   // Vesting is explained where it first appears — no cold jargon (WHI-86).
   await expect(page.getByText("Vesting is just how long you stay")).toBeVisible();
 
-  // The Chapter 7 quiz is the third finale condition (WHI-97).
+  // The Chapter 7 quiz unlocks the Final Exam (WHI-97, WHI-98).
+  const exam = page.locator("[data-exam]");
+  await expect(exam).toBeHidden();
   await passQuiz(page, [
     "Your contribution percent",
     "$520",
     "Log in to your 401k provider",
   ]);
+  await expect(exam).toBeVisible();
+
+  // The exam sits after the Lever Room and before the Action Checklist.
+  expect(
+    await page.evaluate(() => {
+      const examEl = document.querySelector("[data-exam]")!;
+      const checklist = document.getElementById("sec-checklist")!;
+      return Boolean(examEl.compareDocumentPosition(checklist) & Node.DOCUMENT_POSITION_FOLLOWING);
+    }),
+  ).toBe(true);
+
+  // — Final Exam: 10 questions spanning the whole journey (WHI-98) —
+  await expect(exam.getByRole("heading", { name: "The Final Exam" })).toBeVisible();
+  for (const answer of EXAM_ANSWERS) {
+    await exam.getByRole("radio", { name: answer, exact: true }).check();
+  }
+  await exam.locator("[data-quiz-submit]").click();
+  await expect(exam.locator("[data-exam-score]")).toContainText("10 out of 10");
 
   // Done-by date is the finale trigger: letter from 65-year-old Allie.
   const letter = page.getByText("— Allie, 2059");
   await expect(letter).toBeHidden();
   await page.locator('.chapter input[type="date"]').fill("2026-09-01");
   await expect(letter).toBeVisible();
+
+  // The letter carries the exam score (WHI-98).
+  await expect(page.getByText(/10 out of 10 on the exam/)).toBeVisible();
 
   // — Resume: reopening the app lands on Chapter 7 with everything kept —
   await page.reload();

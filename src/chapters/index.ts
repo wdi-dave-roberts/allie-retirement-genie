@@ -3,7 +3,7 @@
  * tokens via classes only; no colors live in chapter code.
  */
 
-import type { QuizSpec } from "../lib/quiz";
+import type { QuizSpec, SectionRef } from "../lib/quiz";
 import { chapter1 } from "./ch1-meet-the-genie";
 import { chapter2 } from "./ch2-the-curve";
 import { chapter3 } from "./ch3-free-money";
@@ -15,6 +15,8 @@ import { chapter7 } from "./ch7-lever-room";
 export interface ChapterContext {
   /** Mark this chapter complete and advance (no-op unless it is current). */
   complete(): void;
+  /** Cross-chapter Section Link jump, with a way back (Final Exam links). */
+  gotoSection?(ref: SectionRef): void;
 }
 
 export interface Chapter {
