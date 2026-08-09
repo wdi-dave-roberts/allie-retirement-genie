@@ -13,6 +13,9 @@ let current = loadCurrent(); // furthest unlocked chapter (Resume)
 let view = current; // chapter on screen
 
 function render(): void {
+  const chapter = chapters[view]!;
+  // Self-paced chapters (e.g. Chapter 1 intake) drive their own completion.
+  const hideForward = chapter.selfPaced === true && view === current;
   app.innerHTML = `
     <div class="progress" role="progressbar" aria-valuemin="0"
       aria-valuemax="${CHAPTER_COUNT}" aria-valuenow="${current}"
@@ -21,17 +24,28 @@ function render(): void {
         .map((_, i) => `<div class="progress__seg progress__seg--${statusOf(i, current)}"></div>`)
         .join("")}
     </div>
-    <main class="chapter" data-chapter-id="${chapters[view]!.id}"></main>
+    <main class="chapter" data-chapter-id="${chapter.id}"></main>
     <nav class="nav">
       <button class="btn btn--ghost" data-nav="back" ${view === 0 ? "disabled" : ""}>Back</button>
-      <button class="btn btn--primary" data-nav="forward"
-        ${view === CHAPTER_COUNT - 1 && view < current ? "disabled" : ""}>
+      ${
+        hideForward
+          ? ""
+          : `<button class="btn btn--primary" data-nav="forward">
         ${view < current ? "Continue" : view === CHAPTER_COUNT - 1 ? "Finish" : "Complete chapter"}
-      </button>
+      </button>`
+      }
     </nav>
   `;
 
-  chapters[view]!.render(app.querySelector<HTMLElement>(".chapter")!);
+  chapter.render(app.querySelector<HTMLElement>(".chapter")!, {
+    complete: () => {
+      if (view === current) {
+        current = completeChapter(view, current);
+        view = current;
+        render();
+      }
+    },
+  });
 
   app.querySelector<HTMLButtonElement>('[data-nav="back"]')!.addEventListener("click", () => {
     if (view > 0) {
@@ -40,7 +54,7 @@ function render(): void {
     }
   });
 
-  app.querySelector<HTMLButtonElement>('[data-nav="forward"]')!.addEventListener("click", () => {
+  app.querySelector<HTMLButtonElement>('[data-nav="forward"]')?.addEventListener("click", () => {
     if (view === current) {
       current = completeChapter(view, current);
       view = current;
