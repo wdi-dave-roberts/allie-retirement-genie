@@ -85,6 +85,66 @@ export const NOTES: Record<string, GenieNote> = {
     body: "All your buckets averaged into one honest number — what you actually pay. It always lands below your marginal rate. When a headline scares you, ask which of the two it's quoting.",
   },
 
+
+  // — Chapters 5-7 (WHI-101) —
+  "ch5-roth-vs-traditional": {
+    term: "Roth vs Traditional",
+    body: "Two flavors of the same 401k, split by one question: taxes now (Roth) or taxes at withdrawal (Traditional). Same investments, same growth, same match either way. Pick a flavor, not a fight.",
+    dive: {
+      label: "Roth 401k, from the top",
+      url: "https://www.investopedia.com/terms/r/roth401k.asp",
+    },
+  },
+  "ch5-tax-free-growth": {
+    term: "tax-free growth",
+    body: "In a Roth, the tax collector visits once — on the way in — and never again. Thirty-three years of compounding, withdrawn without a bill at 65. That's the whole romance.",
+  },
+  "ch6-hysa": {
+    term: "high-yield savings account",
+    body: "A plain savings account at an online bank, minus the marble lobby — which is why it pays roughly 10x the big-bank rate. Same federal insurance, up to $250,000. Your emergency fund's natural habitat.",
+    dive: {
+      label: "High-yield savings, explained",
+      url: "https://www.investopedia.com/high-yield-savings-accounts-4770633",
+    },
+  },
+  "ch6-index-fund": {
+    term: "index fund",
+    body: "One fund that buys a sliver of every company in the market, automatically. No manager guessing, no stock-picking — just owning the whole haystack instead of hunting the needle. It's how boring wins.",
+    dive: {
+      label: "Index funds, gently",
+      url: "https://www.investopedia.com/terms/i/indexfund.asp",
+    },
+  },
+  "ch6-target-date-fund": {
+    term: "target-date fund",
+    body: "One fund dated near your retirement year — 2059 for you — that starts stock-heavy and calms itself down as the date approaches. It rebalances on its own; you do nothing. Eleven seconds of choosing, decades of autopilot.",
+    dive: {
+      label: "How target-date funds work",
+      url: "https://www.investopedia.com/terms/t/target-date_fund.asp",
+    },
+  },
+  "ch6-expense-ratio": {
+    term: "expense ratio",
+    body: "What a fund charges yearly to exist, skimmed quietly off the top. Index funds run around 0.03% — three dollars per $10,000 — while actively managed funds often take 30x that for worse results. Fees compound too, just against you.",
+    dive: {
+      label: "Expense ratios, decoded",
+      url: "https://www.investopedia.com/terms/e/expenseratio.asp",
+    },
+  },
+  "ch7-contribution-limit": {
+    term: "contribution limit",
+    body: "The IRS caps 401k deposits at $24,500 a year in 2026 — a ceiling you're nowhere near at 6%, so climb freely. The cap exists because the tax break is generous and Congress keeps a lid on it. Future raises can chase it; today just needs the match.",
+    dive: {
+      label: "The IRS on 401k limits",
+      url: "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-401k-and-profit-sharing-plan-contribution-limits",
+    },
+  },
+  "ch7-raise-assumption": {
+    term: "2% a year raises",
+    body: "A deliberately humble guess: your salary creeping 2% a year ahead of inflation. Careers usually beat that — promotions exist — but the lamp would rather under-promise. Pull the lever up when reality outperforms.",
+  },
+
+
   // — Engine demo (?note-demo) —
   "demo-compounding": {
     term: "compound growth",

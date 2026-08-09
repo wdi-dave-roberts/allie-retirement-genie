@@ -10,6 +10,7 @@ import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
 import { futureValueLumpSum } from "../lib/projection";
 import type { QuizSpec } from "../lib/quiz";
+import { noteRef } from "../notes/genie-note";
 
 /**
  * Idle-cash real return: 0.4% nominal checking yield against a 2.5% long-run
@@ -131,7 +132,7 @@ export const chapter6 = {
       <div class="chapter__genie">${genieSVG("point")}</div>
       <p class="chapter__kicker">Chapter 6</p>
       <h2 class="chapter__title">Where Money Lives</h2>
-      <div class="speech" id="sec-emergency"><p>An account is a <em>bucket</em>, not an investment. Before any magic: an emergency fund. Three to six months of your real spending, parked in a high-yield savings account you never touch — they live at online banks, pay roughly 10x the big-bank rate, and take about ten minutes to open.</p></div>
+      <div class="speech" id="sec-emergency"><p>An account is a <em>bucket</em>, not an investment. Before any magic: an emergency fund. Three to six months of your real spending, parked in a ${noteRef("ch6-hysa", "high-yield savings account")} you never touch — they live at online banks, pay roughly 10x the big-bank rate, and take about ten minutes to open.</p></div>
       <div class="reveal reveal--instant">
         <p class="reveal__number">${formatExact(low)} – ${formatExact(high)}</p>
         <p>Your bucket. Boring on purpose. This is what lets you take every other risk in this app.</p>
@@ -164,13 +165,13 @@ export const chapter6 = {
           <span class="spectrum__tag">the middle of the road</span>
         </li>
         <li class="spectrum__item">
-          <span class="spectrum__name">Stock index funds</span>
+          <span class="spectrum__name">${noteRef("ch6-index-fund", "Stock index funds")}</span>
           <span class="spectrum__bar spectrum__bar--high" aria-hidden="true"></span>
           <span class="spectrum__tag">grows the most, swings the most</span>
         </li>
       </ul>
       <p class="dim spectrum__axis">less risk, less upside&nbsp;&nbsp;→&nbsp;&nbsp;more risk, more upside</p>
-      <div class="speech"><p>Inside the 401k, skip the stock-picking cosplay. Nobody beats the market reliably — so own the <em>whole</em> market for fees around 0.03%. Easiest version: your plan's <strong>target-date fund</strong> — one fund, dated near 2059, that starts aggressive and calms down as you age. It is a genuinely fine default, and picking it takes eleven seconds.</p></div>
+      <div class="speech"><p>Inside the 401k, skip the stock-picking cosplay. Nobody beats the market reliably — so own the <em>whole</em> market for fees around ${noteRef("ch6-expense-ratio", "0.03%")}. Easiest version: your plan's <strong>${noteRef("ch6-target-date-fund", "target-date fund")}</strong> — one fund, dated near 2059, that starts aggressive and calms down as you age. It is a genuinely fine default, and picking it takes eleven seconds.</p></div>
       <div class="speech" id="sec-drop"><p>Why does it start stock-heavy? Because at 32 you have 33 years of runway — swings are survivable, and missing the growth isn't. Which brings me to the fine print I actually want you to remember: some year, your balance <strong>will</strong> drop 20% or more. Normal. Expected. Already baked into every number I've shown you. The only losing move is selling on the way down. A drop isn't the magic breaking — it's the price of the magic.</p></div>
     `;
   },
