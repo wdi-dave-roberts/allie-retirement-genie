@@ -13,6 +13,9 @@ let current = loadCurrent(); // furthest unlocked chapter (Resume)
 let view = current; // chapter on screen
 
 function render(): void {
+  // Each chapter starts at the top — otherwise tapping Continue at the bottom
+  // of one chapter lands mid-page in the next.
+  window.scrollTo(0, 0);
   const chapter = chapters[view]!;
   // Self-paced chapters (e.g. Chapter 1 intake) drive their own completion.
   const hideForward = chapter.selfPaced === true && view === current;

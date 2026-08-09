@@ -86,6 +86,10 @@ function defaultDoneBy(): string {
 export const chapter7 = {
   id: "lever-room",
   title: "Lever Room & Action Checklist",
+  // The story ends here: setting a done-by date is the finale. A "Finish"
+  // button can't advance anywhere (progress clamps at the last chapter), so
+  // let the chapter own its ending like Chapter 1 owns its intake.
+  selfPaced: true,
   render(root: HTMLElement): void {
     const profile = loadProfile();
     if (profile.salary <= 0) {
