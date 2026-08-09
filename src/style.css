@@ -404,6 +404,12 @@ p {
   color: var(--text-dim);
 }
 
+.checklist__note {
+  margin: var(--space-1) 0 0;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 .checklist__item input {
   accent-color: var(--success);
   margin-right: var(--space-2);

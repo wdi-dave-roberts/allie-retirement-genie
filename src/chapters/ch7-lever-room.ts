@@ -147,10 +147,14 @@ export const chapter7 = {
     const q = <T extends HTMLElement>(s: string): T => root.querySelector(s) as T;
     const checklist = loadChecklist();
 
-    const items = (): Array<{ key: keyof Checklist; label: string }> => [
+    const items = (): Array<{ key: keyof Checklist; label: string; note?: string }> => [
       { key: "login", label: "Log in to your 401k provider (the enrollment email HR sent — it's in there somewhere)" },
       { key: "enroll", label: `Enroll at ${levers.contributionPercent}% — your Lever Room number` },
-      { key: "match", label: "Confirm the actual match formula and vesting schedule" },
+      {
+        key: "match",
+        label: "Confirm the actual match formula and vesting schedule",
+        note: "Vesting is just how long you stay before their match is fully yours if you leave. Your own money? Yours from day one, always.",
+      },
       { key: "roth", label: isRothCheckFlagged() ? "Check the Roth 401k box (you flagged this in Chapter 5)" : "Ask whether the plan has a Roth option" },
       { key: "fund", label: "Pick the target-date fund closest to 2059" },
     ];
@@ -161,6 +165,7 @@ export const chapter7 = {
           (it) => `
         <li class="checklist__item ${checklist[it.key] ? "checklist__item--done" : ""}">
           <label><input type="checkbox" data-check="${it.key}" ${checklist[it.key] ? "checked" : ""} /> ${it.label}</label>
+          ${it.note ? `<p class="checklist__note">${it.note}</p>` : ""}
         </li>`,
         )
         .join("");
