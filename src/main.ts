@@ -30,7 +30,7 @@ function render(): void {
     </div>
     <main class="chapter" data-chapter-id="${chapter.id}"></main>
     <nav class="nav">
-      <button class="btn btn--ghost" data-nav="back" ${view === 0 ? "disabled" : ""}>Back</button>
+      ${view === 0 ? "" : `<button class="btn btn--ghost" data-nav="back">Back</button>`}
       ${
         hideForward
           ? ""
@@ -61,7 +61,7 @@ function render(): void {
     },
   });
 
-  app.querySelector<HTMLButtonElement>('[data-nav="back"]')!.addEventListener("click", () => {
+  app.querySelector<HTMLButtonElement>('[data-nav="back"]')?.addEventListener("click", () => {
     if (view > 0) {
       view -= 1;
       render();
