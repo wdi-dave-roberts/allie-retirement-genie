@@ -34,7 +34,13 @@ export function lineChart(opts: LineChartOptions): string {
   const ySpan = yMax - yMin || 1;
 
   const toX = (x: number): number => pad + ((x - xMin) / xSpan) * (width - 2 * pad);
-  const toY = (y: number): number => height - pad - ((y - yMin) / ySpan) * (height - 2 * pad);
+  // A flat series (e.g. $0 balance at 0% contribution) would otherwise pin to
+  // the viewBox floor and read as a rendering failure — center it so a
+  // flat-but-real projection looks deliberate (WHI-103).
+  const flat = Math.min(...ys) === yMax;
+  const toY = flat
+    ? (): number => height / 2
+    : (y: number): number => height - pad - ((y - yMin) / ySpan) * (height - 2 * pad);
 
   const lines = opts.series
     .map((s) => {
