@@ -8,6 +8,7 @@ import { genieSVG, type GeniePose } from "../genie/genie";
 import { chapter2 } from "./ch2-the-curve";
 import { chapter3 } from "./ch3-free-money";
 import { chapter5 } from "./ch5-roth";
+import { chapter7 } from "./ch7-lever-room";
 
 export interface Chapter {
   id: string;
@@ -61,14 +62,5 @@ export const chapters: Chapter[] = [
       "idle",
     ),
   },
-  {
-    id: "lever-room",
-    title: "Lever Room & Action Checklist",
-    render: placeholder(
-      "Chapter 7",
-      "Lever Room & Action Checklist",
-      "Every lever in here is yours. Pull a few and watch your future move.",
-      "celebrate",
-    ),
-  },
+  chapter7,
 ];

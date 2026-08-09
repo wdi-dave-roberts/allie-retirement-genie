@@ -307,6 +307,78 @@ p {
   background: var(--success);
 }
 
+/* Lever Room & Action Checklist (Chapter 7) */
+.lever {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lever label {
+  font-size: var(--step--1);
+  color: var(--text-dim);
+}
+
+.lever strong {
+  color: var(--lamp-gold);
+}
+
+.lever input {
+  width: 100%;
+  accent-color: var(--lamp-gold);
+  min-height: 40px;
+}
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.checklist__item {
+  background: var(--night-800);
+  border: 1px solid var(--night-600);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--step--1);
+}
+
+.checklist__item--done {
+  border-color: var(--success);
+  color: var(--text-dim);
+}
+
+.checklist__item input {
+  accent-color: var(--success);
+  margin-right: var(--space-2);
+}
+
+.doneby {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-dim);
+  font-size: var(--step--1);
+}
+
+.doneby input {
+  font: inherit;
+  background: var(--night-800);
+  border: 1px solid var(--night-600);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: var(--space-2);
+  min-height: 44px;
+}
+
+.finale {
+  text-align: center;
+  animation: reveal-in 0.8s ease-out;
+}
+
 @keyframes confetti-fall {
   from {
     transform: translate(0, 0) rotate(0);
