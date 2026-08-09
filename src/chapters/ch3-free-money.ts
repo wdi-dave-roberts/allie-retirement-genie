@@ -5,6 +5,7 @@
  */
 
 import { genieSVG } from "../genie/genie";
+import { lineChart } from "../lib/chart";
 import { isEnrolled, setEnrolled } from "../lib/enrollment";
 import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
@@ -16,6 +17,8 @@ const START_AGE = 32;
 const RETIRE_AGE = 65;
 /** App-wide default contribution used when there's no match to anchor to. */
 const DEFAULT_CONTRIBUTION_PERCENT = 6;
+/** Slider starts short of full match so the gap is visible on arrival. */
+export const FORFEIT_DEFAULT_PERCENT = 3;
 
 export interface FreeMoneyData {
   /** Employer match per month at full capture. */
@@ -36,6 +39,54 @@ export function freeMoneyData(profile: Profile): FreeMoneyData {
     matchMonthly,
     annualMatch: matchMonthly * 12,
     compounded: futureValueOfStream(matchMonthly, (RETIRE_AGE - START_AGE) * 12),
+  };
+}
+
+export interface ForfeitData {
+  /** Match dollars per year she actually collects at this contribution. */
+  capturedAnnual: number;
+  /** Match dollars per year left with the employer. */
+  forfeitedAnnual: number;
+  /** The forfeited match stream, compounded to 65 in Real Dollars. */
+  forfeitedCompounded: number;
+  /** [age, balance] per year for the full-match line. */
+  fullPoints: Array<[number, number]>;
+  /** [age, balance] per year for her slider setting. */
+  capturedPoints: Array<[number, number]>;
+}
+
+/**
+ * What contributing below the full match costs (WHI-109). Same dollar-for-dollar
+ * model as the rest of the chapter: her contribution is matched up to
+ * `matchPercent`, so anything short of that is match she simply doesn't collect.
+ */
+export function forfeitData(profile: Profile, contributionPercent: number): ForfeitData {
+  const fullMonthly = employerMatchMonthly(
+    profile.salary,
+    profile.matchPercent,
+    profile.matchPercent,
+  );
+  const capturedMonthly = employerMatchMonthly(
+    profile.salary,
+    contributionPercent,
+    profile.matchPercent,
+  );
+  const forfeitedMonthly = fullMonthly - capturedMonthly;
+
+  const fullPoints: Array<[number, number]> = [];
+  const capturedPoints: Array<[number, number]> = [];
+  for (let age = START_AGE; age <= RETIRE_AGE; age++) {
+    const months = (age - START_AGE) * 12;
+    fullPoints.push([age, futureValueOfStream(fullMonthly, months)]);
+    capturedPoints.push([age, futureValueOfStream(capturedMonthly, months)]);
+  }
+
+  return {
+    capturedAnnual: capturedMonthly * 12,
+    forfeitedAnnual: forfeitedMonthly * 12,
+    forfeitedCompounded: futureValueOfStream(forfeitedMonthly, (RETIRE_AGE - START_AGE) * 12),
+    fullPoints,
+    capturedPoints,
   };
 }
 
@@ -160,6 +211,8 @@ export const chapter3 = {
 
     const data = freeMoneyData(profile);
     const noMatch = profile.matchPercent <= 0;
+    // Survives the enroll re-render below, so a toggle doesn't reset her drag.
+    let forfeitPercent = Math.min(FORFEIT_DEFAULT_PERCENT, profile.matchPercent);
     // No match to compound? Show her own default 6% instead — still worth the chapter.
     const ownCompounded = futureValueOfStream(
       contributionMonthly(profile.salary, DEFAULT_CONTRIBUTION_PERCENT),
@@ -172,7 +225,24 @@ export const chapter3 = {
           <p class="reveal__number" data-reveal>${formatMoney(data.compounded)}</p>
           <p>That's just the match — nothing of yours — compounded to 65, in today's dollars.</p>
         </div>
-        <div class="speech" id="sec-double"><p>And here's the part banks dream about: at a dollar-for-dollar match, every dollar you put in up to ${profile.matchPercent}% <strong>doubles the moment it arrives</strong>. 100% return before the market even wakes up.</p></div>`;
+        <div class="speech" id="sec-double"><p>And here's the part banks dream about: at a dollar-for-dollar match, every dollar you put in up to ${profile.matchPercent}% <strong>doubles the moment it arrives</strong>. 100% return before the market even wakes up.</p></div>
+        <div class="speech" id="sec-forfeit"><p>Don't take my word for it. Slide it — this is you putting in less than ${profile.matchPercent}%, and me holding up the part you'd never see.</p></div>
+        <div class="lever">
+          <label>You put in <strong data-forfeit-pct></strong>
+            <input type="range" min="0" max="${profile.matchPercent}" step="1" value="${forfeitPercent}" data-forfeit aria-label="Your contribution percent" /></label>
+        </div>
+        <p data-forfeit-line></p>
+        <figure class="curve">
+          <div data-forfeit-chart></div>
+          <figcaption class="curve__legend">
+            <span class="curve__key curve__key--now">full ${profile.matchPercent}% match</span>
+            <span class="curve__key curve__key--later">your setting</span>
+          </figcaption>
+        </figure>
+        <div class="reveal reveal--instant">
+          <p class="reveal__number" data-forfeit-reveal></p>
+          <p data-forfeit-caption></p>
+        </div>`;
 
     const noMatchBody = `
         <div class="speech" id="sec-match"><p>Your profile says no ${noteRef("ch3-employer-match", "employer match")}. Rare, but it happens — and it changes nothing about the move. The 401k is still your best first bucket: your money goes in before federal tax (Chapter 4 shows that trick), and it compounds untouched for 33 years.</p></div>
@@ -180,6 +250,35 @@ export const chapter3 = {
           <p class="reveal__number" data-reveal>${formatMoney(ownCompounded)}</p>
           <p>That's your own ${DEFAULT_CONTRIBUTION_PERCENT}%, compounded to 65, in today's dollars — no match required.</p>
         </div>`;
+
+    const drawForfeit = (): void => {
+      const slider = root.querySelector<HTMLInputElement>("[data-forfeit]");
+      if (!slider) return; // no-match plans skip the whole beat
+      slider.value = String(forfeitPercent);
+      const f = forfeitData(profile, forfeitPercent);
+      const full = forfeitPercent >= profile.matchPercent;
+
+      root.querySelector("[data-forfeit-pct]")!.textContent = `${forfeitPercent}%`;
+      root.querySelector("[data-forfeit-line]")!.innerHTML = full
+        ? `At ${profile.matchPercent}% they hand you <strong>${formatExact(f.capturedAnnual)}</strong> a year — every dollar they'll give. Nothing stays on their side of the table.`
+        : `At ${forfeitPercent}%, your employer hands you <strong>${formatExact(f.capturedAnnual)}</strong> a year — and keeps the <strong>${formatExact(f.forfeitedAnnual)}</strong> you didn't claim.`;
+      root.querySelector("[data-forfeit-chart]")!.innerHTML = lineChart({
+        series: [
+          { points: f.capturedPoints, className: "curve__line curve__line--later" },
+          { points: f.fullPoints, className: "curve__line curve__line--now" },
+        ],
+        label: `Match dollars compounded to ${RETIRE_AGE}: full ${profile.matchPercent}% capture reaches ${formatMoney(data.compounded)}, contributing ${forfeitPercent}% reaches ${formatMoney(data.compounded - f.forfeitedCompounded)}`,
+        xLabels: [
+          { x: START_AGE, text: String(START_AGE) },
+          { x: Math.round((START_AGE + RETIRE_AGE) / 2), text: String(Math.round((START_AGE + RETIRE_AGE) / 2)) },
+          { x: RETIRE_AGE, text: String(RETIRE_AGE) },
+        ],
+      });
+      root.querySelector("[data-forfeit-reveal]")!.textContent = formatMoney(f.forfeitedCompounded);
+      root.querySelector("[data-forfeit-caption]")!.textContent = full
+        ? "left on the table. Leave the slider right there and that stays true."
+        : `left on the table by ${RETIRE_AGE} — in today's dollars. That's the gap between the two lines, and it's theirs to keep.`;
+    };
 
     const draw = (): void => {
       const enrolled = isEnrolled();
@@ -199,6 +298,11 @@ export const chapter3 = {
         draw();
         if (next) confetti(root);
       });
+      root.querySelector<HTMLInputElement>("[data-forfeit]")?.addEventListener("input", (e) => {
+        forfeitPercent = Number((e.target as HTMLInputElement).value);
+        drawForfeit();
+      });
+      drawForfeit();
     };
 
     draw();

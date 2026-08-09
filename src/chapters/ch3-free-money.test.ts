@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { lineChart } from "../lib/chart";
 import { employerMatchMonthly, futureValueOfStream } from "../lib/projection";
-import { formatExact, freeMoneyData } from "./ch3-free-money";
+import { forfeitData, formatExact, freeMoneyData } from "./ch3-free-money";
 
 const PROFILE = { salary: 65000, monthlySpend: 3200, currentSavings: 4000, matchPercent: 6 };
 
@@ -34,6 +35,69 @@ describe("freeMoneyData", () => {
     const data = freeMoneyData({ ...PROFILE, matchPercent: 0 });
     expect(data.annualMatch).toBe(0);
     expect(data.compounded).toBe(0);
+  });
+});
+
+describe("forfeitData", () => {
+  it("at 0% the whole match is forfeited; at full match nothing is", () => {
+    const none = forfeitData(PROFILE, 0);
+    expect(none.capturedAnnual).toBe(0);
+    expect(none.forfeitedAnnual).toBeCloseTo(freeMoneyData(PROFILE).annualMatch, 6);
+
+    const all = forfeitData(PROFILE, PROFILE.matchPercent);
+    expect(all.forfeitedAnnual).toBe(0);
+    expect(all.forfeitedCompounded).toBe(0);
+  });
+
+  it("captured + forfeited always equals the full match", () => {
+    const full = freeMoneyData(PROFILE).annualMatch;
+    for (const pct of [0, 1, 3, 5, 6]) {
+      const f = forfeitData(PROFILE, pct);
+      expect(f.capturedAnnual + f.forfeitedAnnual).toBeCloseTo(full, 6);
+    }
+  });
+
+  it("never goes negative above the match ceiling", () => {
+    const over = forfeitData(PROFILE, 20);
+    expect(over.forfeitedAnnual).toBe(0);
+    expect(over.capturedAnnual).toBeCloseTo(freeMoneyData(PROFILE).annualMatch, 6);
+  });
+
+  it("forfeited compounding is the projection-lib stream of the unclaimed match", () => {
+    const f = forfeitData(PROFILE, 3);
+    const missed = employerMatchMonthly(65000, 6, 6) - employerMatchMonthly(65000, 3, 6);
+    expect(f.forfeitedCompounded).toBeCloseTo(futureValueOfStream(missed, (65 - 32) * 12), 6);
+  });
+
+  it("lines run 32 to 65 and land on the chapter's compounded figures", () => {
+    const f = forfeitData(PROFILE, 3);
+    expect(f.fullPoints).toHaveLength(65 - 32 + 1);
+    expect(f.fullPoints[0]).toEqual([32, 0]);
+    expect(f.fullPoints[f.fullPoints.length - 1]![1]).toBeCloseTo(
+      freeMoneyData(PROFILE).compounded,
+      6,
+    );
+    // The gap between the lines IS the forfeited compounding.
+    const last = f.fullPoints.length - 1;
+    expect(f.fullPoints[last]![1] - f.capturedPoints[last]![1]).toBeCloseTo(
+      f.forfeitedCompounded,
+      6,
+    );
+  });
+
+  it("renders clean SVG at both slider ends — no NaN when the lines coincide", () => {
+    for (const pct of [0, PROFILE.matchPercent]) {
+      const f = forfeitData(PROFILE, pct);
+      const svg = lineChart({
+        series: [
+          { points: f.capturedPoints, className: "curve__line curve__line--later" },
+          { points: f.fullPoints, className: "curve__line curve__line--now" },
+        ],
+        label: "test",
+        xLabels: [{ x: 32, text: "32" }],
+      });
+      expect(svg).not.toContain("NaN");
+    }
   });
 });
 
