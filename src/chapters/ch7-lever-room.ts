@@ -9,6 +9,7 @@ import { lineChart } from "../lib/chart";
 import { isEnrolled, isRothCheckFlagged } from "../lib/enrollment";
 import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
+import { paintRanges } from "../lib/range";
 import {
   contributionMonthly,
   employerMatchMonthly,
@@ -260,6 +261,7 @@ export const chapter7 = {
     };
 
     const drawProjection = (): void => {
+      paintRanges(root); // filled track follows the thumb (WHI-110)
       const result = leverProjection(profile, levers);
       q("[data-lv='contrib']").textContent = `${levers.contributionPercent}%`;
       q("[data-lv='age']").textContent = String(levers.retireAge);

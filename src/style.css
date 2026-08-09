@@ -384,10 +384,75 @@ p {
   color: var(--lamp-gold);
 }
 
-.lever input {
+/* Range sliders (shared: Ch4 income simulator, Ch7 levers).
+   Unstyled ranges read as a hairline and nobody discovers they're draggable
+   (WHI-110) — so: thick track, gold fill to the left of a fat thumb. WebKit
+   has no ::-moz-range-progress equivalent, hence the --fill gradient painted
+   by paintRange() in src/lib/range.ts. */
+.lever input[type="range"],
+.slider input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  accent-color: var(--lamp-gold);
-  min-height: 40px;
+  min-height: 44px;
+  background: none;
+  cursor: pointer;
+}
+
+.lever input[type="range"]::-webkit-slider-runnable-track,
+.slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--night-600);
+  background: linear-gradient(
+    to right,
+    var(--lamp-gold) 0 var(--fill, 0%),
+    var(--night-800) var(--fill, 0%) 100%
+  );
+}
+
+.lever input[type="range"]::-moz-range-track,
+.slider input[type="range"]::-moz-range-track {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--night-600);
+  background: var(--night-800);
+}
+
+.lever input[type="range"]::-moz-range-progress,
+.slider input[type="range"]::-moz-range-progress {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--lamp-gold);
+}
+
+.lever input[type="range"]::-webkit-slider-thumb,
+.slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -10px; /* centers the 28px thumb on the 10px track */
+  border-radius: 50%;
+  background: var(--lamp-gold);
+  border: 3px solid var(--night-900);
+  box-shadow: 0 0 0 1px var(--lamp-gold-soft);
+}
+
+.lever input[type="range"]::-moz-range-thumb,
+.slider input[type="range"]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--lamp-gold);
+  border: 3px solid var(--night-900);
+  box-shadow: 0 0 0 1px var(--lamp-gold-soft);
+}
+
+.lever input[type="range"]:focus-visible,
+.slider input[type="range"]:focus-visible {
+  outline: 2px solid var(--lamp-gold-soft);
+  outline-offset: 4px;
 }
 
 .checklist {
@@ -850,10 +915,12 @@ form .btn {
 }
 
 /* Bracket buckets (Chapter 4) */
-.slider input {
-  width: 100%;
-  accent-color: var(--lamp-gold);
-  min-height: 44px;
+.slider {
+  display: block;
+}
+
+.slider__hint {
+  margin-bottom: var(--space-1);
 }
 
 .bracket-readout {

@@ -9,6 +9,7 @@ import { genieSVG } from "../genie/genie";
 import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
 import { employerMatchMonthly } from "../lib/projection";
+import { paintRange } from "../lib/range";
 import type { QuizSpec } from "../lib/quiz";
 import { noteRef } from "../notes/genie-note";
 import { uniqueDistractors } from "../quiz/choices";
@@ -56,6 +57,62 @@ function bucketsHTML(): string {
     )
     .join("");
   return `<div class="buckets">${rows}</div>`;
+}
+
+/** Duration and reach of the one-shot slider tour (WHI-110). */
+export const NUDGE_MS = 1000;
+export const NUDGE_AMPLITUDE = 8000;
+
+/**
+ * Slider value at progress `t` (0-1) of the tour: a there-and-back arc that
+ * leaves the thumb exactly where it started.
+ */
+export function nudgeValue(base: number, t: number, amplitude: number = NUDGE_AMPLITUDE): number {
+  return base + amplitude * Math.sin(Math.PI * Math.min(1, Math.max(0, t)));
+}
+
+/**
+ * One-shot "this is draggable" tour: the thumb glides a few thousand dollars
+ * and back over ~1s with the readout live, so the control announces itself
+ * (WHI-110). Chapter 4 renders once per visit, so no replay guard is needed.
+ * Any pointer or key interaction cancels it and restores her salary — the
+ * user's own drag then takes over from wherever they grabbed it.
+ */
+export function nudgeSlider(slider: HTMLInputElement, onFrame: () => void): void {
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+  const base = Number(slider.value);
+  const min = Number(slider.min);
+  const max = Number(slider.max);
+  // Near the ceiling there's no room to glide up — go the other way instead.
+  const amplitude = base + NUDGE_AMPLITUDE > max ? -NUDGE_AMPLITUDE : NUDGE_AMPLITUDE;
+  const cancelEvents = ["pointerdown", "keydown", "touchstart"] as const;
+
+  let frame = 0;
+  let start: number | null = null;
+
+  const stop = (): void => {
+    cancelAnimationFrame(frame);
+    for (const name of cancelEvents) slider.removeEventListener(name, stop);
+    slider.value = String(base);
+    slider.dataset.nudged = "done"; // the tour is over — also what e2e watches for
+    onFrame();
+  };
+
+  const step = (timestamp: number): void => {
+    start ??= timestamp;
+    const t = (timestamp - start) / NUDGE_MS;
+    if (t >= 1) {
+      stop();
+      return;
+    }
+    slider.value = String(Math.min(max, Math.max(min, nudgeValue(base, t, amplitude))));
+    onFrame();
+    frame = requestAnimationFrame(step);
+  };
+
+  for (const name of cancelEvents) slider.addEventListener(name, stop, { once: true });
+  frame = requestAnimationFrame(step);
 }
 
 /** Chapter 4 Quiz (WHI-96) — the monthly-cost figure is hers, from the tax lib. */
@@ -136,8 +193,9 @@ export const chapter4 = {
       <div class="speech"><p>Where does ${formatExact(salary)} actually go? Watch. And yes — that Texas line is <strong>zero state income tax</strong>. I picked a good state to live in a lamp in.</p></div>
       ${waterfallHTML(salary)}
       <div class="speech" id="sec-bracket-myth"><p>Now, the myth. "A raise pushed me into a higher bracket, so I took home less." <strong>Never true.</strong> Only the dollars <em>inside</em> the top bucket get the higher rate. Drag your income and watch.</p></div>
+      <p class="dim slider__hint">Income simulator — drag to try any salary</p>
       <label class="slider">
-        <input type="range" min="20000" max="250000" step="1000" value="${salary}" data-income />
+        <input type="range" min="20000" max="250000" step="1000" value="${salary}" data-income aria-label="Income simulator" />
       </label>
       <p class="bracket-readout">
         Income <strong data-out="income"></strong> ·
@@ -159,6 +217,7 @@ export const chapter4 = {
 
     const update = (): void => {
       const gross = Number(slider.value);
+      paintRange(slider);
       const p = paycheck(gross);
       const taxable = taxableIncome(gross);
       out("income").textContent = formatMoney(gross);
@@ -191,5 +250,6 @@ export const chapter4 = {
 
     slider.addEventListener("input", update);
     update();
+    nudgeSlider(slider, update);
   },
 };
