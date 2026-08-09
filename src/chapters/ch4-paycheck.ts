@@ -13,7 +13,12 @@ import { paintRange } from "../lib/range";
 import type { QuizSpec } from "../lib/quiz";
 import { noteRef } from "../notes/genie-note";
 import { uniqueDistractors } from "../quiz/choices";
-import { BRACKETS_SINGLE_2026, paycheck, taxableIncome } from "../lib/tax2026";
+import {
+  BRACKETS_SINGLE_2026,
+  STANDARD_DEDUCTION_SINGLE_2026,
+  paycheck,
+  taxableIncome,
+} from "../lib/tax2026";
 
 const CONTRIBUTION_PERCENT = 6;
 
@@ -46,15 +51,73 @@ function waterfallHTML(gross: number): string {
     </div>`;
 }
 
+/** Highest bracket worth drawing — the income slider can't reach past it. */
+const TOP_DISPLAYED_RATE = 0.32;
+
+export interface BucketRow {
+  rate: number;
+  /** Dollars this bucket can hold before spilling into the next. */
+  span: number;
+  /** Her dollars currently sitting in it. */
+  dollarsIn: number;
+  /** Tax those dollars generate. */
+  tax: number;
+  /** The top bucket actually receiving dollars — her marginal rate. */
+  marginal: boolean;
+}
+
+/**
+ * The bracket stack in fill order (WHI-111): the standard deduction leads as
+ * the 0% bucket, then each bracket holds the next slice of taxable income.
+ * Every figure derives from src/lib/tax2026.ts — nothing is restated here.
+ */
+export function bucketRows(gross: number): BucketRow[] {
+  const taxable = taxableIncome(gross);
+  const rows: BucketRow[] = [
+    {
+      rate: 0,
+      span: STANDARD_DEDUCTION_SINGLE_2026,
+      dollarsIn: Math.min(Math.max(gross, 0), STANDARD_DEDUCTION_SINGLE_2026),
+      tax: 0,
+      marginal: false,
+    },
+  ];
+
+  let floor = 0;
+  for (const bracket of BRACKETS_SINGLE_2026) {
+    if (bracket.rate > TOP_DISPLAYED_RATE) break;
+    const dollarsIn = Math.max(0, Math.min(taxable, bracket.upTo) - floor);
+    rows.push({
+      rate: bracket.rate,
+      span: bracket.upTo - floor,
+      dollarsIn,
+      tax: dollarsIn * bracket.rate,
+      marginal: false,
+    });
+    floor = bracket.upTo;
+  }
+
+  // Below the deduction nothing is taxed, so the freebie bucket is the top one.
+  const top = rows.reduce((best, row, i) => (row.dollarsIn > 0 ? i : best), 0);
+  rows[top]!.marginal = true;
+  return rows;
+}
+
 function bucketsHTML(): string {
-  const rows = BRACKETS_SINGLE_2026.filter((b) => b.upTo <= 260_000 || b.rate === 0.24)
-    .map(
-      (b) => `
-      <div class="bucket" data-rate="${b.rate}">
-        <span class="bucket__label">${pct(b.rate)}</span>
+  const rows = bucketRows(0)
+    .map((row, i) => {
+      const label =
+        row.rate === 0
+          ? `your first ${formatExact(row.span)} — the ${noteRef("ch4-standard-deduction", "standard deduction")}`
+          : `the next ${formatExact(row.span)}`;
+      return `
+      <div class="bucket" data-bucket="${i}">
+        <p class="bucket__label"><span class="bucket__rate">${pct(row.rate)}</span> · ${label}
+          <span class="bucket__badge" data-badge hidden>← your marginal rate</span></p>
         <div class="bucket__track"><div class="bucket__fill" data-fill></div></div>
-      </div>`,
-    )
+        <p class="bucket__note" data-note></p>
+      </div>`;
+    })
     .join("");
   return `<div class="buckets">${rows}</div>`;
 }
@@ -147,7 +210,8 @@ export function quizCh4(profile: Profile): QuizSpec {
           "Lower — it's the average across all your buckets",
         ],
         correctIndex: 2,
-        explain: "Averaged across every bucket, it always lands below your top rate.",
+        explain:
+          "Add up the tax from every bucket, divide by your gross — that sum is on screen under the stack, and it always lands below your top rate.",
         sectionRef: { chapter: 3, anchor: "sec-effective" },
       },
       {
@@ -192,7 +256,8 @@ export const chapter4 = {
       <h2 class="chapter__title">Your Paycheck &amp; the Bracket Myth</h2>
       <div class="speech"><p>Where does ${formatExact(salary)} actually go? Watch. And yes — that Texas line is <strong>zero state income tax</strong>. I picked a good state to live in a lamp in.</p></div>
       ${waterfallHTML(salary)}
-      <div class="speech" id="sec-bracket-myth"><p>Now, the myth. "A raise pushed me into a higher bracket, so I took home less." <strong>Never true.</strong> Only the dollars <em>inside</em> the top bucket get the higher rate. Drag your income and watch.</p></div>
+      <div class="speech" id="sec-deduction"><p>Before any of that gets taxed, a freebie: the government ignores your first <strong>${formatExact(STANDARD_DEDUCTION_SINGLE_2026)}</strong>. That's the standard deduction — 0%, no paperwork, everybody gets it. Only what's left over goes into buckets.</p></div>
+      <div class="speech" id="sec-bracket-myth"><p>Now, the myth. "A raise pushed me into a higher bracket, so I took home less." <strong>Never true.</strong> Each bucket fills, then spills into the next — and only the dollars <em>inside</em> the top bucket get the higher rate. Drag your income and watch.</p></div>
       <p class="dim slider__hint">Income simulator — drag to try any salary</p>
       <label class="slider">
         <input type="range" min="20000" max="250000" step="1000" value="${salary}" data-income aria-label="Income simulator" />
@@ -203,8 +268,9 @@ export const chapter4 = {
         ${noteRef("ch4-effective-rate", "effective")} <strong data-out="effective"></strong><br />
         Take-home <strong data-out="net"></strong> <span class="dim" data-out="delta"></span>
       </p>
-      <p class="dim" id="sec-effective">"Effective" is what you actually pay averaged across all your buckets — always lower than your top one.</p>
       ${bucketsHTML()}
+      <p class="bucket-sum" data-bucket-sum></p>
+      <p class="dim" id="sec-effective">"Effective" is what you actually pay averaged across all your buckets — always lower than your top one.</p>
       <div class="speech" id="sec-pretax"><p>One more trick while we're here: your 6% goes in <em>before</em> federal tax. That's ${formatExact(contribution / 12)} a month (${formatExact(contribution)} a year) — but your take-home only drops <strong>${formatExact(monthlyCost)} a month</strong>, while <strong>${formatExact(monthlyIntoAccount)} a month</strong> lands in your account, match included.</p></div>
       <p class="dim">2026 single-filer brackets, ${noteRef("ch4-standard-deduction", "standard deduction")}, verified against IRS and SSA sources. Real Dollars everywhere else, real tax law here.</p>
     `;
@@ -219,7 +285,6 @@ export const chapter4 = {
       const gross = Number(slider.value);
       paintRange(slider);
       const p = paycheck(gross);
-      const taxable = taxableIncome(gross);
       out("income").textContent = formatMoney(gross);
       out("marginal").textContent = pct(p.marginalRate);
       out("effective").textContent = pct(p.effectiveRate);
@@ -235,17 +300,23 @@ export const chapter4 = {
       lastGross = gross;
       lastNet = p.net;
 
-      let floor = 0;
-      for (const bucket of fills) {
-        const rate = Number(bucket.dataset.rate);
-        const bracket = BRACKETS_SINGLE_2026.find((b) => b.rate === rate)!;
-        const span = Math.min(bracket.upTo, 260_000) - floor;
-        const inBucket = Math.max(0, Math.min(taxable, bracket.upTo) - floor);
+      // Dollars in, tax out, per bucket — the spillover is the lesson.
+      const rows = bucketRows(gross);
+      rows.forEach((row, i) => {
+        const bucket = fills[i]!;
         bucket.querySelector<HTMLElement>("[data-fill]")!.style.width =
-          `${((inBucket / span) * 100).toFixed(1)}%`;
-        bucket.classList.toggle("bucket--top", taxable > floor && taxable <= bracket.upTo);
-        floor = bracket.upTo;
-      }
+          `${((row.dollarsIn / row.span) * 100).toFixed(1)}%`;
+        bucket.querySelector<HTMLElement>("[data-note]")!.textContent =
+          row.dollarsIn > 0
+            ? `${formatExact(row.dollarsIn)} in → ${formatExact(row.tax)} tax`
+            : "empty — your income doesn't reach this one";
+        bucket.classList.toggle("bucket--top", row.marginal);
+        bucket.querySelector<HTMLElement>("[data-badge]")!.hidden = !row.marginal;
+      });
+
+      // Effective rate as the visible sum of what's on screen.
+      root.querySelector<HTMLElement>("[data-bucket-sum]")!.textContent =
+        `all buckets: ${formatExact(p.federal)} tax ÷ ${formatExact(gross)} = ${pct(p.effectiveRate)} effective`;
     };
 
     slider.addEventListener("input", update);
