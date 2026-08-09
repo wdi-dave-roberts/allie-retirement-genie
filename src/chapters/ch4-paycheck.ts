@@ -154,7 +154,8 @@ export const chapter4 = {
     const slider = root.querySelector<HTMLInputElement>("[data-income]")!;
     const out = (name: string): HTMLElement => root.querySelector(`[data-out="${name}"]`)!;
     const fills = [...root.querySelectorAll<HTMLElement>(".bucket")];
-    let lastNet = paycheck(Number(slider.value)).net;
+    let lastGross = Number(slider.value);
+    let lastNet = paycheck(lastGross).net;
 
     const update = (): void => {
       const gross = Number(slider.value);
@@ -164,8 +165,15 @@ export const chapter4 = {
       out("marginal").textContent = pct(p.marginalRate);
       out("effective").textContent = pct(p.effectiveRate);
       out("net").textContent = formatExact(p.net);
+      // "IMPOSSIBLE" is the raise-never-lowers-take-home invariant — it only
+      // applies when income moved up. Dragging left lowers net legitimately.
       out("delta").textContent =
-        p.net >= lastNet ? "— up, always up" : "— IMPOSSIBLE, file a bug";
+        gross >= lastGross
+          ? p.net >= lastNet
+            ? "— up, always up"
+            : "— IMPOSSIBLE, file a bug"
+          : "— less in, less out. The myth only breaks upward.";
+      lastGross = gross;
       lastNet = p.net;
 
       let floor = 0;
