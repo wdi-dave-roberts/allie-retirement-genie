@@ -53,6 +53,28 @@ Maintained by `loop-spec`. Edit directly if a definition drifts from reality.
   Allie to her `current` chapter. One-shot doesn't mean one-sitting.
 
 - **Reset** — full wipe of all persisted state (Profile, chapter progress,
-  "I'm in" toggle, Roth flag, Action Checklist) back to first-open: Chapter 1
-  intake. Triggered from a subtle "Start over" footer link present on every
-  Chapter, behind a confirm dialog in Genie voice. There is no partial reset.
+  "I'm in" toggle, Roth flag, Action Checklist, Quiz and Final Exam state)
+  back to first-open: Chapter 1 intake. Triggered from a subtle "Start over"
+  footer link present on every Chapter, behind a confirm dialog in Genie
+  voice. There is no partial reset.
+
+- **Quiz** — 3-question check at the end of each Chapter, taken to complete
+  the Chapter. Questions are personalized from the Profile where possible.
+  Passing is optional: after the Try limit, the Answer Key shows and she
+  advances regardless. State persists per Chapter in `localStorage`.
+
+- **Try** — one whole-quiz submission. Max 3 per Quiz (and per Final Exam).
+  After each Try, every answer is colored (green = right, red = wrong, with
+  icons — never color alone); wrong answers stay editable.
+
+- **Answer Key** — the disclosure after the 3rd Try (or a pass): correct
+  answers, a one-line Genie explanation each, and a Section Link per question.
+  Distinct from **Reveal**, which stays reserved for chart moments.
+
+- **Section Link** — a link on a Quiz/Exam question that jumps back to the
+  Chapter section teaching that concept, without losing quiz state.
+
+- **Final Exam** — 10 questions spanning all Chapters, presented after
+  Chapter 7's Lever Room and before the Action Checklist. Same Try/Answer Key
+  rules as a Quiz. The finale celebration references the score; the journey
+  still ends with the Action Checklist, not the test.
