@@ -5,7 +5,8 @@ import { configDefaults, defineConfig } from "vitest/config";
 export default defineConfig({
   base: "/allie-retirement-genie/",
   test: {
-    // e2e/ is Playwright's turf (pnpm test:e2e), not vitest's.
-    exclude: [...configDefaults.exclude, "e2e/**"],
+    // e2e/ is Playwright's turf (pnpm test:e2e), not vitest's. .claude/ holds
+    // loop worktrees whose copies of everything must not be swept in either.
+    exclude: [...configDefaults.exclude, "e2e/**", ".claude/**"],
   },
 });
