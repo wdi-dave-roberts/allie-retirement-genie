@@ -5,8 +5,20 @@
 
 import { genieSVG } from "../genie/genie";
 import { isRothCheckFlagged, setRothCheckFlagged } from "../lib/enrollment";
+import { formatMoney } from "../lib/format";
 import type { QuizSpec } from "../lib/quiz";
 import { noteRef } from "../notes/genie-note";
+import { BRACKETS_SINGLE_2026, STANDARD_DEDUCTION_SINGLE_2026 } from "../lib/tax2026";
+
+/**
+ * Gross income where the 22% bracket begins — the point where the Roth
+ * recommendation deserves a second look. Derived from the tax constants so
+ * a year-over-year update there keeps this copy honest.
+ */
+export function rothRethinkGross(): number {
+  const twelvePctTop = BRACKETS_SINGLE_2026.find((b) => b.rate === 0.12)!.upTo;
+  return twelvePctTop + STANDARD_DEDUCTION_SINGLE_2026;
+}
 
 /** Chapter 5 Quiz (WHI-97) — static: the one difference, the pick, the match. */
 export function quizCh5(): QuizSpec {
@@ -81,7 +93,8 @@ export const chapter5 = {
           </div>
         </div>
         <div class="speech"><p>Same dollar, same growth, same math — the only question is whether your tax rate is lower today or at 65. You're 32, single, with decades of raises ahead. Today is probably the cheapest tax you will ever pay.</p></div>
-        <div class="speech speech--recommendation" id="sec-recommendation"><p><strong>My recommendation: pick Roth if your plan offers a Roth 401k.</strong> Your rate today is likely the lowest it'll ever be, and 33 years of growth ${noteRef("ch5-tax-free-growth", "walks out tax-free")}. No Roth option? Traditional is still a clear win — and the match is pre-tax either way, so nothing about this choice should delay enrolling.</p></div>
+        <div class="speech"><p>Why so confident? Your top rate today is 12% — near the bottom of the ladder. Traditional's only trick is skipping tax at a <em>high</em> rate to pay a lower one later, and skipping 12% saves almost nothing. Worst case, Roth costs you a rounding error. And if this plan works, future-you is richer than today-you — then Roth wins outright. When a raise pushes you past ${formatMoney(rothRethinkGross())} — that's where the 22% bracket starts — the question gets interesting. Revisit it then.</p></div>
+        <div class="speech speech--recommendation" id="sec-recommendation"><p><strong>My recommendation: pick Roth if your plan offers a Roth 401k.</strong> Your rate today is likely the lowest it'll ever be, and 33 years of growth ${noteRef("ch5-tax-free-growth", "walks out tax-free")}. One honest trade: Roth skips Chapter 4's take-home discount — your paycheck feels the whole contribution now, and the payback is never paying tax on those dollars again. No Roth option? Traditional is still a clear win — and the match is pre-tax either way, so nothing about this choice should delay enrolling.</p></div>
         <button class="btn ${flagged ? "btn--ghost" : "btn--primary"}" data-roth-check>
           ${flagged ? "On my checklist ✓" : "Remind me: does my plan have Roth?"}
         </button>
