@@ -838,6 +838,29 @@ form .btn {
   padding: var(--space-2) 0;
 }
 
+/* First-ever pass: the folded key announces itself once (human UAT). */
+.quiz__key-aside {
+  margin-bottom: 0;
+}
+
+.quiz__key-disclosure--fresh summary {
+  animation: key-shimmer 1s ease-in-out 2;
+  border-radius: 4px;
+}
+
+@keyframes key-shimmer {
+  50% {
+    background: var(--lamp-gold-dim);
+    box-shadow: 0 0 12px var(--lamp-gold-dim);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz__key-disclosure--fresh summary {
+    animation: none;
+  }
+}
+
 /* Floating way back after a Section Link jump */
 .quiz-return {
   position: fixed;

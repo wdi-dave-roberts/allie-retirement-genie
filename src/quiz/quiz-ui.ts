@@ -26,9 +26,17 @@ export interface QuizHooks {
   onSectionLink?: (ref: SectionRef) => void;
 }
 
+/**
+ * First-ever quiz pass across the app: the folded Answer Key is easy to miss
+ * (human UAT — four chapters missed), so that one time it announces itself.
+ * The genie.quiz. prefix means reset wipes this along with the quiz states.
+ */
+const SEEN_KEY = "genie.quiz.seen-key.v1";
+
 export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks = {}): void {
   const { questions } = spec;
   let state = loadQuizState(spec.id, questions.length);
+  let freshKeyReveal = false;
 
   const copy = {
     title: "Quick quiz",
@@ -103,10 +111,15 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
     // On a pass the key is a courtesy, not remediation — fold it away so the
     // win moment stays clean. Out of Tries, it stays open: there it IS the
     // teaching (WHI-107).
+    if (win && localStorage.getItem(SEEN_KEY) === null) {
+      localStorage.setItem(SEEN_KEY, "1");
+      freshKeyReveal = true;
+    }
     const keyHTML = !done
       ? ""
       : win
-        ? `<details class="quiz__key-disclosure" data-key-disclosure>
+        ? `${freshKeyReveal ? `<p class="dim quiz__key-aside" data-key-aside>Your answers keep, in there ↓</p>` : ""}
+          <details class="quiz__key-disclosure ${freshKeyReveal ? "quiz__key-disclosure--fresh" : ""}" data-key-disclosure>
             <summary class="quiz__link">Review answers</summary>
             ${keyBody}
           </details>`
