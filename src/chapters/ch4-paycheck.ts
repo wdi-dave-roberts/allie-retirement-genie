@@ -10,6 +10,7 @@ import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
 import { employerMatchMonthly } from "../lib/projection";
 import type { QuizSpec } from "../lib/quiz";
+import { noteRef } from "../notes/genie-note";
 import { uniqueDistractors } from "../quiz/choices";
 import { BRACKETS_SINGLE_2026, paycheck, taxableIncome } from "../lib/tax2026";
 
@@ -38,7 +39,7 @@ function waterfallHTML(gross: number): string {
     <div class="waterfall">
       ${seg("Gross", gross, "waterfall__bar--gross")}
       ${seg("Federal tax", p.federal, "waterfall__bar--tax")}
-      ${seg("FICA", p.fica, "waterfall__bar--tax")}
+      ${seg(noteRef("ch4-fica", "FICA"), p.fica, "waterfall__bar--tax")}
       ${seg("Texas tax", 0, "waterfall__bar--tax")}
       ${seg("Take-home", p.net, "waterfall__bar--net")}
     </div>`;
@@ -140,14 +141,14 @@ export const chapter4 = {
       </label>
       <p class="bracket-readout">
         Income <strong data-out="income"></strong> ·
-        marginal <strong data-out="marginal"></strong> ·
-        effective <strong data-out="effective"></strong><br />
+        ${noteRef("ch4-marginal-bracket", "marginal")} <strong data-out="marginal"></strong> ·
+        ${noteRef("ch4-effective-rate", "effective")} <strong data-out="effective"></strong><br />
         Take-home <strong data-out="net"></strong> <span class="dim" data-out="delta"></span>
       </p>
       <p class="dim" id="sec-effective">"Effective" is what you actually pay averaged across all your buckets — always lower than your top one.</p>
       ${bucketsHTML()}
       <div class="speech" id="sec-pretax"><p>One more trick while we're here: your 6% goes in <em>before</em> federal tax. Contributing ${formatExact(contribution)} a year only shrinks your take-home by <strong>${formatExact(monthlyCost)} a month</strong> — while <strong>${formatExact(monthlyIntoAccount)} a month</strong> lands in your account, match included.</p></div>
-      <p class="dim">2026 single-filer brackets, standard deduction, verified against IRS and SSA sources. Real Dollars everywhere else, real tax law here.</p>
+      <p class="dim">2026 single-filer brackets, ${noteRef("ch4-standard-deduction", "standard deduction")}, verified against IRS and SSA sources. Real Dollars everywhere else, real tax law here.</p>
     `;
 
     const slider = root.querySelector<HTMLInputElement>("[data-income]")!;

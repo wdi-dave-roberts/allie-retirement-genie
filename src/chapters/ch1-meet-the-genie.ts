@@ -9,6 +9,7 @@ import { genieSVG } from "../genie/genie";
 import { loadProfile, saveProfile, type Profile } from "../lib/profile";
 import { loadCurrent } from "../lib/progress";
 import { isDone, loadQuizState, type QuizSpec } from "../lib/quiz";
+import { noteRef } from "../notes/genie-note";
 import { renderQuiz } from "../quiz/quiz-ui";
 import type { Chapter, ChapterContext } from "./index";
 
@@ -40,7 +41,7 @@ export const QUESTIONS: Question[] = [
   },
   {
     key: "matchPercent",
-    ask: "What percent of your salary does your employer match?",
+    ask: `What percent of your salary does your employer match in your ${noteRef("ch1-401k", "401k")}?`,
     hint: "If you're not sure, leave it at 6 — that's your plan's number.",
     unit: "%",
   },

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from "vitest";
 import { closeGenieNote, initGenieNotes, noteRef, resetGenieNotesForTest } from "./genie-note";
-import { getNote } from "./registry";
+import { NOTES, getNote } from "./registry";
 
 const click = (el: Element): void => {
   el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -15,6 +15,44 @@ describe("registry", () => {
     expect(getNote("demo-compounding")?.dive?.url).toContain("investopedia");
     expect(getNote("demo-real-dollars")?.dive).toBeUndefined();
     expect(getNote("nope")).toBeUndefined();
+  });
+});
+
+describe("chapter note content (WHI-100)", () => {
+  const CH1_4 = [
+    "ch1-401k",
+    "ch2-compound-growth",
+    "ch2-real-return",
+    "ch2-the-number",
+    "ch3-employer-match",
+    "ch4-fica",
+    "ch4-standard-deduction",
+    "ch4-marginal-bracket",
+    "ch4-effective-rate",
+  ];
+
+  it("registers all nine Chapter 1-4 notes, well-formed", () => {
+    for (const id of CH1_4) {
+      const note = getNote(id)!;
+      expect(note, id).toBeDefined();
+      expect(note.term.length, id).toBeGreaterThan(0);
+      // 2-3 sentences, Genie-short.
+      const sentences = note.body.split(/[.!?](?:\s|$)/).filter((s) => s.trim().length > 0);
+      expect(sentences.length, id).toBeGreaterThanOrEqual(2);
+      expect(sentences.length, id).toBeLessThanOrEqual(3);
+      if (note.dive) expect(note.dive.url, id).toMatch(/^https:\/\//);
+    }
+  });
+
+  it("keeps the FICA split and the 2026 standard deduction exact", () => {
+    expect(getNote("ch4-fica")?.body).toContain("6.2%");
+    expect(getNote("ch4-fica")?.body).toContain("1.45%");
+    expect(getNote("ch4-standard-deduction")?.body).toContain("$16,100");
+  });
+
+  it("stays within the app-wide note budget alongside Ch5-7", () => {
+    const chapterNotes = Object.keys(NOTES).filter((id) => !id.startsWith("demo-"));
+    expect(chapterNotes.length).toBeLessThanOrEqual(20); // 15-20 budget, Ch5-7 still to come
   });
 });
 
