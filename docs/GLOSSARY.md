@@ -78,3 +78,15 @@ Maintained by `loop-spec`. Edit directly if a definition drifts from reality.
   Chapter 7's Lever Room and before the Action Checklist. Same Try/Answer Key
   rules as a Quiz. The finale celebration references the score; the journey
   still ends with the Action Checklist, not the test.
+
+- **Genie Note** — level-1 progressive disclosure: a curated term or figure
+  rendered tappable (dotted-underline affordance; hover on desktop, tap on
+  phone) that opens a short in-voice popup explanation. At most one open at a
+  time; dismiss by tap-outside or close. ~15-20 exist across the app — an
+  invitation to linger, never required reading.
+
+- **Deeper Dive** — level-2 disclosure: an optional single external link at
+  the foot of a Genie Note, opening in a new tab. Sources are hand-curated
+  and beginner-suitable (Investopedia/CFPB-style explainers over IRS PDFs;
+  official sources only when the figure itself is the point). Zero or one
+  per Genie Note.
