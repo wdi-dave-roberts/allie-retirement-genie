@@ -130,6 +130,16 @@ export function renderQuiz(host: HTMLElement, spec: QuizSpec, hooks: QuizHooks =
       state = submitTry(state, questions);
       saveQuizState(spec.id, state);
       draw();
+      // The redrawn button lands where the old one was, so a double-tap's
+      // second tap would burn a second Try. Hold it disabled for one
+      // gesture's length — one tap, one Try.
+      const fresh = host.querySelector<HTMLButtonElement>("[data-quiz-submit]");
+      if (fresh) {
+        fresh.disabled = true;
+        setTimeout(() => {
+          fresh.disabled = !allAnswered(state);
+        }, 350);
+      }
       hooks.onChange?.(isDone(state, questions));
     });
 
