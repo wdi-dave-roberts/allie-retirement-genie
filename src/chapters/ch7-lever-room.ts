@@ -212,6 +212,10 @@ export const chapter7 = {
       <div class="speech" data-nudge hidden>
         <p>The magic needs my three questions answered, the Final Exam faced, the enroll box checked, and a done-by date. That's the whole spell — and something good happens when you cast it.</p>
       </div>
+      <div data-closure hidden>
+        <div class="chapter__genie">${genieSVG("idle")}</div>
+        <div class="speech"><p>Seven chapters, one exam — you've seen your whole future. Most people never look. The checklist above is how you keep what you saw: the enroll box and a done-by date turn the story into money. I'll be in the lamp when you're ready.</p></div>
+      </div>
       <div class="finale" data-finale hidden>
         <div class="chapter__genie">${genieSVG("celebrate")}</div>
         <div class="speech"><p data-note></p></div>
@@ -309,9 +313,14 @@ export const chapter7 = {
     const finale = (fire: boolean): void => {
       const el = q("[data-finale]");
       const was = el.hidden;
-      const ready = finaleReady(checklist) && quizDone && examDone;
+      const learned = quizDone && examDone;
+      const ready = finaleReady(checklist) && learned;
       el.hidden = !ready;
-      q("[data-nudge]").hidden = ready;
+      // Spell instructions while learning remains; once the exam is behind
+      // her but the ritual isn't, a finisher gets closure instead of a
+      // hanging nudge — the full finale stays the reward for committing (WHI-108).
+      q("[data-nudge]").hidden = ready || learned;
+      q("[data-closure]").hidden = !learned || ready;
       if (fire && was && !el.hidden) confetti(root);
     };
 

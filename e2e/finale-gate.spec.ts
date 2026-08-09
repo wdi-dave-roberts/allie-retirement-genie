@@ -44,19 +44,35 @@ async function openChapter7(
   await expect(page.getByRole("heading", { name: "Lever Room" })).toBeVisible();
 }
 
+test("finished learner without a commitment gets closure, not a hanging nudge (WHI-108)", async ({ page }) => {
+  await openChapter7(page); // quiz + exam done, checklist untouched
+  const closure = page.locator("[data-closure]");
+  const letter = page.getByText("— Allie, 2059");
+
+  await expect(closure).toBeVisible();
+  await expect(closure).toContainText("you've seen your whole future");
+  await expect(page.locator("[data-nudge]")).toBeHidden(); // spell recap yields to closure
+  await expect(letter).toBeHidden(); // full finale still reserved for committing
+
+  await page.locator('input[type="date"]').fill("2026-09-01");
+  await page.locator('[data-check="enroll"]').check();
+  await expect(letter).toBeVisible();
+  await expect(closure).toBeHidden(); // closure hands off to the real ending
+});
+
 test("date then box: finale waits for the enroll commitment", async ({ page }) => {
   await openChapter7(page);
   const letter = page.getByText("— Allie, 2059");
-  const nudge = page.locator("[data-nudge]");
+  const closure = page.locator("[data-closure]"); // the finished-learner beat (WHI-108)
 
-  await expect(nudge).toBeVisible();
+  await expect(closure).toBeVisible();
   await page.locator('input[type="date"]').fill("2026-09-01");
   await expect(letter).toBeHidden(); // date alone is not enough
-  await expect(nudge).toBeVisible();
+  await expect(closure).toBeVisible();
 
   await page.locator('[data-check="enroll"]').check();
   await expect(letter).toBeVisible();
-  await expect(nudge).toBeHidden();
+  await expect(closure).toBeHidden();
 
   // Persists on reload; unchecking takes it back.
   await page.reload();
