@@ -276,3 +276,44 @@ p {
     transform: none;
   }
 }
+
+/* Confetti (Chapter 3 Enrollment moment) */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti__piece {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  animation: confetti-fall 1.6s ease-in forwards;
+}
+
+.confetti__piece--0 {
+  background: var(--lamp-gold);
+}
+
+.confetti__piece--1 {
+  background: var(--star);
+}
+
+.confetti__piece--2 {
+  background: var(--success);
+}
+
+@keyframes confetti-fall {
+  from {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), 70vh) rotate(var(--rot));
+    opacity: 0;
+  }
+}
