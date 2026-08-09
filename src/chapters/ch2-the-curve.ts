@@ -14,6 +14,7 @@ import {
   futureValueOfStream,
 } from "../lib/projection";
 import type { QuizSpec } from "../lib/quiz";
+import { noteRef } from "../notes/genie-note";
 import { uniqueDistractors } from "../quiz/choices";
 
 export const START_AGE = 32;
@@ -123,7 +124,7 @@ export const chapter2 = {
       <p class="chapter__kicker">Chapter 2</p>
       <h2 class="chapter__title">The Curve</h2>
       <div class="speech"><p>Quick setup first: say you put 6% of each paycheck into your 401k, and your employer chips in the same on top. That second part sounds made up — it's real, and Chapter 3 is entirely about it.</p></div>
-      <div class="speech" id="sec-growth"><p>Now watch that money grow — starting today vs starting at 42. Growth earns growth. That's the whole trick.</p></div>
+      <div class="speech" id="sec-growth"><p>Now watch that money grow — starting today vs starting at 42. ${noteRef("ch2-compound-growth", "Growth earns growth")}. That's the whole trick.</p></div>
       <figure class="curve">
         ${lineChart({
           series: [
@@ -133,7 +134,7 @@ export const chapter2 = {
           label: `Savings to age ${RETIRE_AGE}: starting now reaches ${formatMoney(data.now)}, starting at ${LATE_START_AGE} reaches ${formatMoney(data.later)}`,
         })}
         <figcaption class="curve__legend">
-          <span class="curve__key curve__key--now">start now → ${formatMoney(data.now)}</span>
+          <span class="curve__key curve__key--now">start now → ${noteRef("ch2-the-number", formatMoney(data.now))}</span>
           <span class="curve__key curve__key--later">start at ${LATE_START_AGE} → ${formatMoney(data.later)}</span>
         </figcaption>
       </figure>
@@ -141,7 +142,7 @@ export const chapter2 = {
         <p class="reveal__number" data-reveal>${formatMoney(data.gap)}</p>
         <p>That's what waiting ten years costs you — in today's dollars. Not a fee. Just growth that never got the chance to grow.</p>
       </div>
-      <p class="dim" id="sec-real-dollars">Real Dollars: inflation is already accounted for, so this is what it buys in 2026 terms.</p>
+      <p class="dim" id="sec-real-dollars">Real Dollars: inflation is already accounted for, so this is what it buys in 2026 terms — all of it grown at ${noteRef("ch2-real-return", "7% real")} a year.</p>
     `;
   },
 };

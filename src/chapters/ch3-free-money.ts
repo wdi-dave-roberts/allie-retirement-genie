@@ -10,6 +10,7 @@ import { formatMoney } from "../lib/format";
 import { loadProfile, type Profile } from "../lib/profile";
 import { contributionMonthly, employerMatchMonthly, futureValueOfStream } from "../lib/projection";
 import type { QuizSpec } from "../lib/quiz";
+import { noteRef } from "../notes/genie-note";
 
 const START_AGE = 32;
 const RETIRE_AGE = 65;
@@ -166,7 +167,7 @@ export const chapter3 = {
     );
 
     const matchBody = `
-        <div class="speech" id="sec-match"><p>Your employer matches what you put in, up to ${profile.matchPercent}% of your salary. If your plan matches dollar-for-dollar — most do — being unenrolled means declining a <strong>${formatExact(data.annualMatch)}-a-year raise</strong>. On purpose. For no reason. (You'll confirm your plan's exact formula in Chapter 7 — it's on the checklist.)</p></div>
+        <div class="speech" id="sec-match"><p>Your ${noteRef("ch3-employer-match", "employer matches")} what you put in, up to ${profile.matchPercent}% of your salary. If your plan matches dollar-for-dollar — most do — being unenrolled means declining a <strong>${formatExact(data.annualMatch)}-a-year raise</strong>. On purpose. For no reason. (You'll confirm your plan's exact formula in Chapter 7 — it's on the checklist.)</p></div>
         <div class="reveal">
           <p class="reveal__number" data-reveal>${formatMoney(data.compounded)}</p>
           <p>That's just the match — nothing of yours — compounded to 65, in today's dollars.</p>
@@ -174,7 +175,7 @@ export const chapter3 = {
         <div class="speech" id="sec-double"><p>And here's the part banks dream about: at a dollar-for-dollar match, every dollar you put in up to ${profile.matchPercent}% <strong>doubles the moment it arrives</strong>. 100% return before the market even wakes up.</p></div>`;
 
     const noMatchBody = `
-        <div class="speech" id="sec-match"><p>Your profile says no employer match. Rare, but it happens — and it changes nothing about the move. The 401k is still your best first bucket: your money goes in before federal tax (Chapter 4 shows that trick), and it compounds untouched for 33 years.</p></div>
+        <div class="speech" id="sec-match"><p>Your profile says no ${noteRef("ch3-employer-match", "employer match")}. Rare, but it happens — and it changes nothing about the move. The 401k is still your best first bucket: your money goes in before federal tax (Chapter 4 shows that trick), and it compounds untouched for 33 years.</p></div>
         <div class="reveal">
           <p class="reveal__number" data-reveal>${formatMoney(ownCompounded)}</p>
           <p>That's your own ${DEFAULT_CONTRIBUTION_PERCENT}%, compounded to 65, in today's dollars — no match required.</p>
