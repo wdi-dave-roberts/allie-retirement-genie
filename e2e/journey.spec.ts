@@ -65,6 +65,9 @@ test("full journey: intake → seven chapters → celebration → resume", async
   // Roth check from Chapter 5 carried into the checklist.
   await expect(page.getByText("you flagged this in Chapter 5")).toBeVisible();
 
+  // Vesting is explained where it first appears — no cold jargon (WHI-86).
+  await expect(page.getByText("Vesting is just how long you stay")).toBeVisible();
+
   // Done-by date is the finale trigger: letter from 65-year-old Allie.
   const letter = page.getByText("— Allie, 2059");
   await expect(letter).toBeHidden();
