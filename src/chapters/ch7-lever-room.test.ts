@@ -5,7 +5,7 @@ import {
   futureValueLumpSum,
   futureValueOfStream,
 } from "../lib/projection";
-import { CURRENT_AGE, leverProjection } from "./ch7-lever-room";
+import { CURRENT_AGE, finaleReady, leverProjection } from "./ch7-lever-room";
 
 const PROFILE = { salary: 65000, monthlySpend: 3200, currentSavings: 4000, matchPercent: 6 };
 
@@ -53,5 +53,14 @@ describe("leverProjection", () => {
     expect(points[0]).toEqual([32, 4000]);
     expect(points[points.length - 1]![0]).toBe(58);
     expect(points).toHaveLength(58 - 32 + 1);
+  });
+});
+
+describe("finaleReady", () => {
+  it("needs both the done-by date and the enroll box", () => {
+    expect(finaleReady({ doneBy: "2026-09-01", enroll: true })).toBe(true);
+    expect(finaleReady({ doneBy: "2026-09-01", enroll: false })).toBe(false);
+    expect(finaleReady({ doneBy: "", enroll: true })).toBe(false);
+    expect(finaleReady({ doneBy: "", enroll: false })).toBe(false);
   });
 });
